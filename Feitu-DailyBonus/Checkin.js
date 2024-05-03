@@ -34,11 +34,10 @@ const barkKey = '' //Bark APP 通知推送Key
 
 $.Messages = []
 
-
 !(async () => {
   if (typeof $request !== 'undefined') {
     // 获取cookie
-    GetCookie(cookies)
+    await GetCookie(cookies)
   } else if (!cookies) {
     // 非重写，没有cookie
     $.Messages.push(`签到Cookie失效/未获取 ⚠️`)
@@ -61,7 +60,7 @@ async function checkin(cookies) {
         Authorization: eachCK,
         'User-Agent':
           'Mozilla/5.0 (iPhone; CPU iPhone OS 16_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/124.0.6367.88 Mobile/15E148 Safari/604.1',
-      }
+      },
     }
     const getInfoOptions = {
       url: 'https://api-cdn.feitu.im/ft/gateway/cn/user/getSubscribe',
@@ -69,76 +68,84 @@ async function checkin(cookies) {
         Authorization: eachCK,
         'User-Agent':
           'Mozilla/5.0 (iPhone; CPU iPhone OS 16_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/124.0.6367.88 Mobile/15E148 Safari/604.1',
-      }
+      },
     }
-    $.get(checkinOptions, async function (error, response, data) {
-      const body = JSON.parse(data);
-      if (body?.total) {
-        $.msgBody = `\n签到结果: 成功 🎉`
-        $.msgBody += `\nresult.message}，可用${result.total} G`
-      } else {
-        $.log(result.message)
-        $.msgBody = `\n签到结果: 失败 ⚠️`
-        $.msgBody += `\n+ 说明: ${result?.message || result || ''}`
-      }
-      if (barkKey) {
-        await BarkNotify($, barkKey, $.name, $.msgBody)
-      }
-      $.Messages.push($.msgBody)
-    })
-    $.get(getInfoOptions, async function (error, response, data) {
-      const body = JSON.parse(data);
-      if (body?.plan_id) {
-        $.msgBody += `\n账号：${body.email}`
-        $.msgBody += `\n用量：${(body.d/1024/1024/1024).toFixed(2)}/${(body.transfer_enable/1024/1024/1024).toFixed(2)} G`
-      } else {
-        $.log(result.message)
-        $.msgBody += `\n账号: ${body.email}`
-        $.msgBody += `\n未购买订阅`
-      }
-      if (barkKey) {
-        await BarkNotify($, barkKey, $.name, $.msgBody)
-      }
-      $.Messages.push($.msgBody)
-    })
+    const checkInResponse = await $.get(checkinOptions)
+
+    const checkInbody = JSON.parse(checkInResponse.body)
+    if (checkInbody?.total) {
+      $.msgBody = `\n签到结果: 成功 🎉`
+      $.msgBody += `\nresult.message}，可用 ${checkInbody.total} G`
+    } else {
+      $.log(checkInbody.message)
+      $.msgBody = `\n签到结果: 失败 ⚠️`
+      $.msgBody += `\n+ 说明: ${checkInbody?.message || checkInbody || ''}`
+    }
+    if (barkKey) {
+      await BarkNotify($, barkKey, $.name, $.msgBody)
+    }
+    $.Messages.push($.msgBody)
+
+    const getInfoResponse = await $.get(getInfoOptions)
+    const infoBody = JSON.parse(getInfoResponse.body)
+    if (infoBody?.plan_id) {
+      $.msgBody += `\n账号：${infoBody.email}`
+      $.msgBody += `\n用量：${(infoBody.d / 1024 / 1024 / 1024).toFixed(2)}/${(infoBody.transfer_enable /1024 /1024 /1024).toFixed(2)} G`
+    } else {
+      $.msgBody += `\n账号: ${infoBody.email}`
+      $.msgBody += `\n未购买订阅`
+    }
+    if (barkKey) {
+      await BarkNotify($, barkKey, $.name, $.msgBody)
+    }
+    $.Messages.push($.msgBody)
   }
 }
 
-function GetCookie(oldCookie) {
+async function GetCookie(oldCookie) {
   const req = JSON.stringify($request)
-  const CK = $request.headers['Authorization'] || $request.headers['authorization']
+  const newCookieValue = $request.headers['Authorization'] || $request.headers['authorization']
 
   $.log(req)
-  if (!CK) {
+  if (!newCookieValue) {
     $.Messages.push($.name, ``, `获取Cookie失败，关键值缺失 ⚠️`)
   } else {
-    cookies = cookies.filter(v=>v!=CK);
-    if (cookies.length > 0) {
-      for (let eachCK of cookies) {
+    oldCookie = oldCookie.filter((v) => v != newCookieValue)
+    if (oldCookie.length > 0) {
+      for (let eachCK of oldCookie) {
         // 检查旧cookies
         const checkCookieOption = {
           url: 'https://api-cdn.feitu.im/ft/gateway/cn/user/getSubscribe',
           headers: {
-            Authorization: cookie,
+            Authorization: eachCK,
             'User-Agent':
               'Mozilla/5.0 (iPhone; CPU iPhone OS 16_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/124.0.6367.88 Mobile/15E148 Safari/604.1',
           },
         }
+        const getInfoResponse = await $.get(checkCookieOption)
+        if (getInfoResponse.status != 200 && getInfoResponse.error && !getInfoResponse.body) {
+          // $.logErr(`校验旧Cookie失败!\n${error}`)
+          $.msgBody = `校验旧Cookie失败!\n${error}`
+          oldCookie = oldCookie.filter((v) => v != eachCK)
+        } else {
+          $.msgBody = '校验旧Cookie成功'
+        }
 
-        $.get(checkCookieOption, async function (error, response, data) {
+        $.Messages.push($.msgBody)
+        /*$.get(checkCookieOption, async function (error, response, data) {
           if (error && !data) {
             // $.logErr(`校验旧Cookie失败!\n${error}`)
             $.msgBody = `校验旧Cookie失败!\n${error}`
-            cookies.remove(eachCK)
+            oldCookie = oldCookie.filter(v=> v != eachCK);
           } else {
             $.msgBody = '校验旧Cookie成功'
           }
           $.Messages.push($.msgBody)
-        })
+        })*/
       }
     }
-    cookies.push(CK)
-    const setCookies = $.setdata(cookies, `feitu_Cookies`)
+    oldCookie.push(newCookieValue)
+    const setCookies = $.setdata(oldCookie, `feitu_Cookies`)
 
     if (oldCookie.length > 0) {
       $.Messages.push(`更新Cookie${setCookies ? `成功 🎉，现有${setCookies.length} 个` : `失败 ⚠️`}`)
