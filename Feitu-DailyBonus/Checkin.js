@@ -28,7 +28,7 @@ hostname = api-cdn.feitu.im
 
 const $ = new Env(`飞兔云`)
 
-const cookies = $.getdata('feitu_Cookies') || [] // 飞兔云Cookies，支持多个
+let cookies = $.getdata('feitu_Cookies') || [] // 飞兔云Cookies，支持多个
 
 const barkKey = '' //Bark APP 通知推送Key
 
