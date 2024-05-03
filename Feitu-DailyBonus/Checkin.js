@@ -28,7 +28,7 @@ hostname = api-cdn.feitu.im
 
 const $ = new Env(`飞兔云`)
 
-let cookies = $.getdata('feitu_Cookies') || [] // 飞兔云Cookies，支持多个
+let cookies = JSON.parse($.getdata('feitu_Cookies')) || [] // 飞兔云Cookies，支持多个
 
 const barkKey = '' //Bark APP 通知推送Key
 
@@ -141,7 +141,7 @@ async function GetCookie(oldCookie) {
     }
     $.log(`添加新Cookie: ${newCookieValue}`)
     oldCookie.push(newCookieValue)
-    const setCookies = $.setdata(oldCookie, `feitu_Cookies`)
+    const setCookies = $.setdata(JSON.stringify(oldCookie), `feitu_Cookies`)
     $.log(`添加新Cookie end`)
 
     if (oldCookie.length > 0) {
