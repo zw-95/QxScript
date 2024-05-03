@@ -41,8 +41,7 @@ $.Messages = []
     GetCookie(cookies)
   } else if (!cookies) {
     // 非重写，没有cookie
-    $.msg($.name, ``, `签到Cookie失效/未获取 ⚠️`)
-    $.done()
+    $.Messages.push(`签到Cookie失效/未获取 ⚠️`)
   } else {
     // 执行签到
     await checkin(cookies)
