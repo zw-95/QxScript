@@ -142,6 +142,7 @@ async function GetCookie(oldCookie) {
     $.log(`添加新Cookie: ${newCookieValue}`)
     oldCookie.push(newCookieValue)
     const setCookies = $.setdata(oldCookie, `feitu_Cookies`)
+    $.log(`添加新Cookie end`)
 
     if (oldCookie.length > 0) {
       $.Messages.push(`更新Cookie${setCookies ? `成功 🎉，现有${setCookies.length} 个` : `失败 ⚠️`}`)
