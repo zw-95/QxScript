@@ -56,51 +56,69 @@ $.Messages = []
 
 async function checkin(cookies) {
   for (let eachCK of cookies) {
-    const checkinOptions = {
-      url: 'https://api-cdn.feitu.im/ft/gateway/cn/user/sign',
-      headers: {
-        Authorization: eachCK,
-        'User-Agent':
-          'Mozilla/5.0 (iPhone; CPU iPhone OS 16_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/124.0.6367.88 Mobile/15E148 Safari/604.1',
-      },
-    }
-    const getInfoOptions = {
-      url: 'https://api-cdn.feitu.im/ft/gateway/cn/user/getSubscribe',
-      headers: {
-        Authorization: eachCK,
-        'User-Agent':
-          'Mozilla/5.0 (iPhone; CPU iPhone OS 16_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/124.0.6367.88 Mobile/15E148 Safari/604.1',
-      },
-    }
-    const checkInResponse = await $.get(checkinOptions)
+    try {
+      const checkinOptions = {
+        url: 'https://api-cdn.feitu.im/ft/gateway/cn/user/sign',
+        headers: {
+          Authorization: eachCK,
+          'User-Agent':
+            'Mozilla/5.0 (iPhone; CPU iPhone OS 16_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/124.0.6367.88 Mobile/15E148 Safari/604.1',
+        },
+      }
+      const getInfoOptions = {
+        url: 'https://api-cdn.feitu.im/ft/gateway/cn/user/getSubscribe',
+        headers: {
+          Authorization: eachCK,
+          'User-Agent':
+            'Mozilla/5.0 (iPhone; CPU iPhone OS 16_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/124.0.6367.88 Mobile/15E148 Safari/604.1',
+        },
+      }
+      const checkInResponse = await $.get(checkinOptions)
 
-    const checkInbody = JSON.parse(checkInResponse.body)
-    if (checkInbody?.total) {
-      $.msgBody = `\n签到结果: 成功 🎉`
-      $.msgBody += `\nresult.message}，可用 ${checkInbody.total} G`
-    } else {
-      $.log(checkInbody.message)
-      $.msgBody = `\n签到结果: 失败 ⚠️`
-      $.msgBody += `\n+ 说明: ${checkInbody?.message || checkInbody || ''}`
-    }
-    if (barkKey) {
-      await BarkNotify($, barkKey, $.name, $.msgBody)
-    }
-    $.Messages.push($.msgBody)
+      const checkInbody = JSON.parse(checkInResponse.body)
+      if (checkInbody?.total) {
+        $.msgBody = `\n签到结果: 成功 🎉`
+        $.msgBody += `\n${checkInbody.message}，可用 ${checkInbody.total} G`
+      } else {
+        $.log(checkInbody.message)
+        $.msgBody = `\n签到结果: 失败 ⚠️`
+        $.msgBody += `\n+ 说明: ${checkInbody?.message || checkInbody || ''}`
+      }
+      if (barkKey) {
+        await BarkNotify($, barkKey, $.name, $.msgBody)
+      }
+      $.Messages.push($.msgBody)
 
-    const getInfoResponse = await $.get(getInfoOptions)
-    const infoBody = JSON.parse(getInfoResponse.body)
-    if (infoBody?.plan_id) {
-      $.msgBody += `\n账号：${infoBody.email}`
-      $.msgBody += `\n用量：${(infoBody.d / 1024 / 1024 / 1024).toFixed(2)}/${(infoBody.transfer_enable /1024 /1024 /1024).toFixed(2)} G`
-    } else {
-      $.msgBody += `\n账号: ${infoBody.email}`
-      $.msgBody += `\n未购买订阅`
+      const getInfoResponse = await $.get(getInfoOptions)
+      const infoBody = JSON.parse(getInfoResponse.body)
+      if (infoBody?.plan_id) {
+        $.msgBody += `\n账号：${infoBody.email}`
+        $.msgBody += `\n用量：${(infoBody.d / 1024 / 1024 / 1024).toFixed(2)}/${(
+          infoBody.transfer_enable /
+          1024 /
+          1024 /
+          1024
+        ).toFixed(2)} G`
+      } else {
+        $.msgBody += `\n账号: ${infoBody.email}`
+        $.msgBody += `\n未购买订阅`
+      }
+      if (barkKey) {
+        await BarkNotify($, barkKey, $.name, $.msgBody)
+      }
+      $.Messages.push($.msgBody)
+    } catch (error) {
+       // 捕获异常并处理
+       console.error('发生错误:', error.message);
+       // 可以根据错误类型或消息来决定如何处理
+       // 例如，可以设置一个默认的消息体或者退出循环等
+       $.msgBody = `\n签到结果: 异常 ⚠️\n+ 说明: ${error.message}`;
+       if (barkKey) {
+         await BarkNotify($, barkKey, $.name, $.msgBody);
+       }
+       $.Messages.push($.msgBody);
+       continue; // 如果你想在捕获异常后继续执行循环，可以使用continue
     }
-    if (barkKey) {
-      await BarkNotify($, barkKey, $.name, $.msgBody)
-    }
-    $.Messages.push($.msgBody)
   }
 }
 
