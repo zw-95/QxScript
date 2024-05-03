@@ -19,7 +19,7 @@ QX 1.0.10+ :
 
 [rewrite_local]
 #飞兔云Cookie
-^https:\/\/api-cdn.feitu.im\/ft\/gateway\/cn\/user\/getSubscribe url script-request-header https://raw.githubusercontent.com/zw-95/Script/master/Feituyun-DailyBonus/Checkin.js
+^https:\/\/api-cdn.feitu.im\/ft\/gateway\/cn\/user\/getSubscribe url script-request-header https://raw.githubusercontent.com/zw-95/QxScript/master/Feitu-DailyBonus/Checkin.js
 
 [mitm]
 hostname = api-cdn.feitu.im
@@ -50,7 +50,7 @@ $.Messages = []
 })()
   .catch((e) => $.Messages.push(e.message || e) && $.logErr(e))
   .finally(async () => {
-    await sendMsg($.Messages.join('\n').trimStart().trimEnd()) // 推送通知
+    await $.msg($.name, ``, $.Messages.join('\n').trimStart().trimEnd());
     $.done()
   })
 
@@ -142,7 +142,6 @@ async function GetCookie(oldCookie) {
     $.log(`添加新Cookie: ${newCookieValue}`)
     oldCookie.push(newCookieValue)
     const setCookies = $.setdata(JSON.stringify(oldCookie), `feitu_Cookies`)
-    $.log(`添加新Cookie end`)
 
     if (oldCookie.length > 0) {
       $.Messages.push(`更新Cookie${setCookies ? `成功 🎉，现有${setCookies.length} 个` : `失败 ⚠️`}`)
