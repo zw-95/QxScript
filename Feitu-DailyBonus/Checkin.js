@@ -148,6 +148,7 @@ async function GetCookie(oldCookie) {
     } else {
       $.Messages.push(`获取Cookie${setCookies ? `成功 🎉，现有${setCookies.length} 个` : `失败 ⚠️`}`)
     }
+    $.log(`获取Cookie结束`)
   }
 }
 
