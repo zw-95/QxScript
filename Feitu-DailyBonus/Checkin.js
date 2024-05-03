@@ -118,7 +118,7 @@ async function checkin(cookies) {
       $.Messages.push($.msgBody)
     } catch (error) {
        // 捕获异常并处理
-       console.error('发生错误:', error.message);
+       $.logErr('发生错误:', error.message);
        // 可以根据错误类型或消息来决定如何处理
        // 例如，可以设置一个默认的消息体或者退出循环等
        $.msgBody = `\n签到结果: 异常 ⚠️\n+ 说明: ${error.message}`;
