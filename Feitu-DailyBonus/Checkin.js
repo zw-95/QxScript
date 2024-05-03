@@ -37,12 +37,14 @@ $.Messages = []
 !(async () => {
   if (typeof $request !== 'undefined') {
     // 获取cookie
+    $.log('开始获取 Cookie')
     await GetCookie(cookies)
   } else if (!cookies) {
     // 非重写，没有cookie
     $.Messages.push(`签到Cookie失效/未获取 ⚠️`)
   } else {
     // 执行签到
+    $.log('开始签到')
     await checkin(cookies)
   }
 })()
