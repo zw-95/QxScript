@@ -112,7 +112,7 @@ function GetCookie(oldCookie) {
   if (!CK) {
     $.Messages.push($.name, ``, `获取Cookie失败，关键值缺失 ⚠️`)
   } else {
-    cookies.remove(CK)
+    cookies = cookies.filter(v=>v!=CK);
     if (cookies.length > 0) {
       for (let eachCK of cookies) {
         // 检查旧cookies
