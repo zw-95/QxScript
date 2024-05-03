@@ -74,16 +74,21 @@ async function checkin(cookies) {
         },
       }
       const checkInResponse = await $.get(checkinOptions)
-
-      const checkInbody = JSON.parse(checkInResponse.body)
-      if (checkInbody?.total) {
-        $.msgBody = `\n签到结果: 成功 🎉`
-        $.msgBody += `\n${checkInbody.message}，可用 ${checkInbody.total} G`
-      } else {
-        $.log(checkInbody.message)
-        $.msgBody = `\n签到结果: 失败 ⚠️`
-        $.msgBody += `\n+ 说明: ${checkInbody?.message || checkInbody || ''}`
+      if(checkInResponse.body){
+        const checkInbody = checkInResponse.body
+        if (checkInbody?.total) {
+          $.msgBody = `\n签到结果: 成功 🎉`
+          $.msgBody += `\n${checkInbody.message}，可用 ${checkInbody.total} G`
+        } else {
+          $.log(checkInbody.message)
+          $.msgBody = `\n签到结果: 失败 ⚠️`
+          $.msgBody += `\n+ 说明: ${checkInbody?.message || checkInbody || ''}`
+        }
+      }else{
+        throw new Error(`签到失败:${$.toStr(checkInResponse)}`)
       }
+      const checkInbody = JSON.parse(checkInResponse.body)
+      
       if (barkKey) {
         await BarkNotify($, barkKey, $.name, $.msgBody)
       }
@@ -91,17 +96,21 @@ async function checkin(cookies) {
 
       const getInfoResponse = await $.get(getInfoOptions)
       const infoBody = JSON.parse(getInfoResponse.body)
-      if (infoBody?.plan_id) {
-        $.msgBody += `\n账号：${infoBody.email}`
-        $.msgBody += `\n用量：${(infoBody.d / 1024 / 1024 / 1024).toFixed(2)}/${(
-          infoBody.transfer_enable /
-          1024 /
-          1024 /
-          1024
-        ).toFixed(2)} G`
+      if (checkInResponse.body) {
+        if (infoBody?.plan_id) {
+          $.msgBody += `\n账号：${infoBody.email}`
+          $.msgBody += `\n用量：${(infoBody.d / 1024 / 1024 / 1024).toFixed(2)}/${(
+            infoBody.transfer_enable /
+            1024 /
+            1024 /
+            1024
+          ).toFixed(2)} G`
+        } else {
+          $.msgBody += `\n账号: ${infoBody.email}`
+          $.msgBody += `\n未购买订阅`
+        }
       } else {
-        $.msgBody += `\n账号: ${infoBody.email}`
-        $.msgBody += `\n未购买订阅`
+        throw new Error(`签到失败:${$.toStr(checkInResponse)}`)
       }
       if (barkKey) {
         await BarkNotify($, barkKey, $.name, $.msgBody)
