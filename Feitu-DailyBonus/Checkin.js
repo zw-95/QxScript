@@ -73,21 +73,26 @@ async function checkin(cookies) {
             'Mozilla/5.0 (iPhone; CPU iPhone OS 16_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/124.0.6367.88 Mobile/15E148 Safari/604.1',
         },
       }
-      const checkInResponse = await $.get(checkinOptions)
-      if(checkInResponse.body){
-        const checkInbody = checkInResponse.body
+      const checkInResponse = await new Promise((resolve) => {
+        $.get(checkinOptions, (error, resp, data) => {
+          resolve(resp)
+        })
+      })
+      $.log('checkInResponse:', checkInResponse);
+      
+      if(checkInResponse){
+        const checkInbody = JSON.parse(checkInResponse.body)
         if (checkInbody?.total) {
           $.msgBody = `\n签到结果: 成功 🎉`
           $.msgBody += `\n${checkInbody.message}，可用 ${checkInbody.total} G`
         } else {
           $.log(checkInbody.message)
           $.msgBody = `\n签到结果: 失败 ⚠️`
-          $.msgBody += `\n+ 说明: ${checkInbody?.message || checkInbody || ''}`
+          $.msgBody += `\n说明: ${checkInbody?.message || checkInbody || ''}`
         }
       }else{
         throw new Error(`签到失败:${$.toStr(checkInResponse)}`)
       }
-      const checkInbody = JSON.parse(checkInResponse.body)
       
       if (barkKey) {
         await BarkNotify($, barkKey, $.name, $.msgBody)
