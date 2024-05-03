@@ -106,9 +106,10 @@ async function checkin(cookies) {
 
 async function GetCookie(oldCookie) {
   const req = JSON.stringify($request)
-  const newCookieValue = $request.headers['Authorization'] || $request.headers['authorization']
-
   $.log(req)
+  const newCookieValue = $request.headers['Authorization'] || $request.headers['authorization']
+  $.log(`检测到Cookie: ${newCookieValue}`)
+
   if (!newCookieValue) {
     $.Messages.push($.name, ``, `获取Cookie失败，关键值缺失 ⚠️`)
   } else {
@@ -116,6 +117,7 @@ async function GetCookie(oldCookie) {
     if (oldCookie.length > 0) {
       for (let eachCK of oldCookie) {
         // 检查旧cookies
+        $.log(`检查旧Cookie: ${eachCK}`)
         const checkCookieOption = {
           url: 'https://api-cdn.feitu.im/ft/gateway/cn/user/getSubscribe',
           headers: {
@@ -126,26 +128,18 @@ async function GetCookie(oldCookie) {
         }
         const getInfoResponse = await $.get(checkCookieOption)
         if (getInfoResponse.status != 200 && getInfoResponse.error && !getInfoResponse.body) {
-          // $.logErr(`校验旧Cookie失败!\n${error}`)
+          $.logErr(`校验旧Cookie失败!${eachCK}\n${error}`)
           $.msgBody = `校验旧Cookie失败!\n${error}`
           oldCookie = oldCookie.filter((v) => v != eachCK)
         } else {
-          $.msgBody = '校验旧Cookie成功'
+        $.log(`校验旧Cookie成功: ${eachCK}`)
+        $.msgBody = '校验旧Cookie成功'
         }
 
         $.Messages.push($.msgBody)
-        /*$.get(checkCookieOption, async function (error, response, data) {
-          if (error && !data) {
-            // $.logErr(`校验旧Cookie失败!\n${error}`)
-            $.msgBody = `校验旧Cookie失败!\n${error}`
-            oldCookie = oldCookie.filter(v=> v != eachCK);
-          } else {
-            $.msgBody = '校验旧Cookie成功'
-          }
-          $.Messages.push($.msgBody)
-        })*/
       }
     }
+    $.log(`添加新Cookie: ${newCookieValue}`)
     oldCookie.push(newCookieValue)
     const setCookies = $.setdata(oldCookie, `feitu_Cookies`)
 
