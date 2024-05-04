@@ -2,24 +2,22 @@
 飞兔云签到
 
 脚本兼容：QuantumultX
-电报频道：
-问题反馈：
-更新日期：2024-05-03
+更新日期：2024-05-04
 如果转载，请注明出处
 
 说明：
-打开飞兔云登录. 
+打开飞兔云登录，或者已登录的刷新首页。支持多个账号，请用不同浏览器打开，避免旧账号cookie失效
 
-脚本将在每天上午9点执行。 您可以修改执行时间。
+脚本将在每天上午6点执行。 您可以修改执行时间。
 ~~~~~~~~~~~~~~~~
 QX 1.0.10+ :
 
 [task_local]
-0 6 * * * https://raw.githubusercontent.com/zw-95/Script/master/Feituyun-DailyBonus/Checkin.js, tag=飞兔云签到
+0 6 * * * https://raw.githubusercontent.com/zw-95/QxScript/master/Feitu-DailyBonus/Checkin.js, tag=飞兔云签到
 
 [rewrite_local]
 #飞兔云Cookie
-^https:\/\/api-cdn.feitu.im\/ft\/gateway\/cn\/user\/getSubscribe url script-request-header https://raw.githubusercontent.com/zw-95/QxScript/master/Feitu-DailyBonus/Checkin.js
+^https:\/\/api-cdn.feitu.im\/ft\/gateway\/cn\/user\/getSubscribe ^GET url-and-header script-request-header https://raw.githubusercontent.com/zw-95/QxScript/master/Feitu-DailyBonus/Checkin.js
 
 [mitm]
 hostname = api-cdn.feitu.im
@@ -28,11 +26,12 @@ hostname = api-cdn.feitu.im
 
 const $ = new Env(`飞兔云`)
 
-let cookies = JSON.parse($.getdata('feitu_Cookies')||"[]")  // 飞兔云Cookies，支持多个
+let cookies = JSON.parse($.getdata('feitu_Cookies') || '[]') // 飞兔云Cookies，支持多个
 
 const barkKey = '' //Bark APP 通知推送Key
 
 $.Messages = []
+$.msgBody = ''
 
 !(async () => {
   if (typeof $request !== 'undefined') {
@@ -48,9 +47,17 @@ $.Messages = []
     await checkin(cookies)
   }
 })()
-  .catch((e) => $.Messages.push(e.message || e) && $.logErr(e))
+  .catch((e) => {
+    $.Messages.push(e.message || e) && $.logErr(e)
+  })
   .finally(async () => {
-    await $.msg($.name, ``, $.Messages.join('\n').trimStart().trimEnd());
+    if ($.Messages.length > 0) {
+      await $.msg($.name, ``, $.Messages.join('\n').trimStart().trimEnd())
+      if (barkKey) {
+        await BarkNotify($, barkKey, $.name, $.Messages.join('\n').trimStart().trimEnd())
+      }
+    }
+
     $.done()
   })
 
@@ -73,84 +80,79 @@ async function checkin(cookies) {
             'Mozilla/5.0 (iPhone; CPU iPhone OS 16_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/124.0.6367.88 Mobile/15E148 Safari/604.1',
         },
       }
+      // 获取订阅信息
+      const getInfoResponse = await new Promise((resolve) => {
+        $.get(getInfoOptions, (error, resp, data) => {
+          resolve(resp)
+        })
+      })
+      if (getInfoResponse && getInfoResponse.status == 200) {
+        const infoBody = JSON.parse(getInfoResponse.body)
+        const infoData = infoBody.data
+        if (infoData.plan_id) {
+          let expirdDate = formatTimestamp(new Date(infoData.expired_at));
+          let used = `${(infoData.d / 1024 / 1024 / 1024).toFixed(1)}`;
+          let total = `${(infoData.transfer_enable /1024 /1024 /1024).toFixed(1)}`;
+          $.msgBody += `账号:${infoData.email},用量:${used}/${total}G,${infoData.reset_day}天重置,${expirdDate}到期`
+        } else {
+          $.msgBody += `\n账号:${infoData.email},未购买订阅`
+        }
+      } else {
+        throw new Error(`获取账号信息失败，请检查账号登录是否过期`)
+      }
+      
+      // 获取签到结果
       const checkInResponse = await new Promise((resolve) => {
         $.get(checkinOptions, (error, resp, data) => {
           resolve(resp)
         })
       })
-      $.log('checkInResponse:', checkInResponse);
-      
-      if(checkInResponse){
+      if (checkInResponse && checkInResponse.status == 200) {
         const checkInbody = JSON.parse(checkInResponse.body)
-        if (checkInbody?.total) {
-          $.msgBody = `\n签到结果: 成功 🎉`
-          $.msgBody += `\n${checkInbody.message}，可用 ${checkInbody.total} G`
+        if (!!checkInbody.total) {
+          $.msgBody += `\n签到:成功 🎉, ${checkInbody.message}，可用${checkInbody.total}G`
         } else {
           $.log(checkInbody.message)
-          $.msgBody = `\n签到结果: 失败 ⚠️`
-          $.msgBody += `\n说明: ${checkInbody?.message || checkInbody || ''}`
-        }
-      }else{
-        throw new Error(`签到失败:${$.toStr(checkInResponse)}`)
-      }
-      
-      if (barkKey) {
-        await BarkNotify($, barkKey, $.name, $.msgBody)
-      }
-      $.Messages.push($.msgBody)
-
-      const getInfoResponse = await $.get(getInfoOptions)
-      const infoBody = JSON.parse(getInfoResponse.body)
-      if (checkInResponse.body) {
-        if (infoBody?.plan_id) {
-          $.msgBody += `\n账号：${infoBody.email}`
-          $.msgBody += `\n用量：${(infoBody.d / 1024 / 1024 / 1024).toFixed(2)}/${(
-            infoBody.transfer_enable /
-            1024 /
-            1024 /
-            1024
-          ).toFixed(2)} G`
-        } else {
-          $.msgBody += `\n账号: ${infoBody.email}`
-          $.msgBody += `\n未购买订阅`
+          $.msgBody += `\n签到:${checkInbody?.message || checkInbody || ''}`
         }
       } else {
-        throw new Error(`签到失败:${$.toStr(checkInResponse)}`)
+        throw new Error(`获取签到信息失败，请检查账号登录是否过期`)
       }
+
       if (barkKey) {
         await BarkNotify($, barkKey, $.name, $.msgBody)
       }
       $.Messages.push($.msgBody)
+      $.msgBody = ''
     } catch (error) {
-       // 捕获异常并处理
-       $.logErr('发生错误:', error.message);
-       // 可以根据错误类型或消息来决定如何处理
-       // 例如，可以设置一个默认的消息体或者退出循环等
-       $.msgBody = `\n签到结果: 异常 ⚠️\n+ 说明: ${error.message}`;
-       if (barkKey) {
-         await BarkNotify($, barkKey, $.name, $.msgBody);
-       }
-       $.Messages.push($.msgBody);
-       continue; // 如果你想在捕获异常后继续执行循环，可以使用continue
+      // 捕获异常并处理
+      $.logErr('发生错误:', error.message)
+      // 可以根据错误类型或消息来决定如何处理
+      // 例如，可以设置一个默认的消息体或者退出循环等
+      $.msgBody = `\n签到结果: 异常 ⚠️\n+ 说明: ${error.message}`
+      if (barkKey) {
+        await BarkNotify($, barkKey, $.name, $.msgBody)
+      }
+      $.Messages.push($.msgBody)
+      continue // 如果你想在捕获异常后继续执行循环，可以使用continue
     }
   }
 }
 
 async function GetCookie(oldCookie) {
   const req = JSON.stringify($request)
-  $.log(req)
   const newCookieValue = $request.headers['Authorization'] || $request.headers['authorization']
-  $.log(`检测到Cookie: ${newCookieValue}`)
+  $.log(`检测到飞兔云Cookie: ${newCookieValue}`)
 
   if (!newCookieValue) {
-    $.Messages.push($.name, ``, `获取Cookie失败，关键值缺失 ⚠️`)
+    $.Messages.push($.name, ``, `获取飞兔云Cookie失败，关键值缺失 ⚠️`)
   } else {
     oldCookie = oldCookie.filter((v) => v != newCookieValue)
     if (oldCookie.length > 0) {
       for (let eachCK of oldCookie) {
         // 检查旧cookies
-        $.log(`检查旧Cookie: ${eachCK}`)
-        const checkCookieOption = {
+        $.log(`检查飞兔云旧Cookie: ${eachCK}`)
+        const getInfoOptions = {
           url: 'https://api-cdn.feitu.im/ft/gateway/cn/user/getSubscribe',
           headers: {
             Authorization: eachCK,
@@ -158,32 +160,44 @@ async function GetCookie(oldCookie) {
               'Mozilla/5.0 (iPhone; CPU iPhone OS 16_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/124.0.6367.88 Mobile/15E148 Safari/604.1',
           },
         }
-        const getInfoResponse = await $.get(checkCookieOption)
+        // 获取订阅信息
+        const getInfoResponse = await new Promise((resolve) => {
+          $.get(getInfoOptions, (error, resp, data) => {
+            resolve(resp)
+          })
+        })
         if (getInfoResponse.status != 200 && getInfoResponse.error && !getInfoResponse.body) {
-          $.logErr(`校验旧Cookie失败!${eachCK}\n${error}`)
-          $.msgBody = `校验旧Cookie失败!\n${error}`
+          $.logErr(`校验飞兔云旧Cookie失败!${eachCK}\n${error}`)
+          $.msgBody += `校验飞兔云旧Cookie失败!\n${error}`
           oldCookie = oldCookie.filter((v) => v != eachCK)
         } else {
-        $.log(`校验旧Cookie成功: ${eachCK}`)
-        $.msgBody = '校验旧Cookie成功'
+          $.log(`校验飞兔云旧Cookie成功: ${eachCK}`)
+          // $.msgBody += '校验飞兔云旧Cookie成功'
         }
 
         $.Messages.push($.msgBody)
       }
     }
-    $.log(`添加新Cookie: ${newCookieValue}`)
+    $.log(`添加新飞兔云Cookie: ${newCookieValue}`)
     oldCookie.push(newCookieValue)
     const setCookies = $.setdata(JSON.stringify(oldCookie), `feitu_Cookies`)
 
     if (oldCookie.length > 0) {
-      $.Messages.push(`更新Cookie${setCookies ? `成功 🎉，现有${setCookies.length} 个` : `失败 ⚠️`}`)
+      $.Messages.push(`更新飞兔云Cookie${setCookies ? `成功 🎉，现有${oldCookie.length} 个` : `失败 ⚠️`}`)
     } else {
-      $.Messages.push(`获取Cookie${setCookies ? `成功 🎉，现有${setCookies.length} 个` : `失败 ⚠️`}`)
+      $.Messages.push(`获取飞兔云Cookie${setCookies ? `成功 🎉，现有${oldCookie.length} 个` : `失败 ⚠️`}`)
     }
     $.log(`获取Cookie结束`)
   }
 }
-
+function formatTimestamp(timestampInSeconds) {
+  var date = new Date(timestampInSeconds * 1000);
+  var year = date.getUTCFullYear(); // 使用UTC函数避免时区问题
+  var month = date.getUTCMonth() + 1; // 月份是从1开始的
+  var day = date.getUTCDate();
+  var formattedDate = year + "-" + month.toString().padStart(2, '0') + "-" + day.toString().padStart(2, '0');
+  return formattedDate;
+}
 //Bark APP notify
 async function BarkNotify(c, k, t, b) { for (let i = 0; i < 3; i++) { console.log(`🔷Bark notify >> Start push (${i + 1})`); const s = await new Promise((n) => { c.post({ url: 'https://api.day.app/push', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title: t, body: b, device_key: k, ext_params: { group: t } }) }, (e, r, d) => r && r.status == 200 ? n(1) : n(d || e)) }); if (s === 1) { console.log('✅Push success!'); break } else { console.log(`❌Push failed! >> ${s.message || s}`) } } };
 
