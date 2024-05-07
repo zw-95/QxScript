@@ -11,12 +11,6 @@
 只测试过loon、QuantumultX和青龙，其它环境请自行尝试】
 
 ====================================
-
-******************************************/
-/*
-微信 去除公众号文章底部广告
-
-***************************
 QuantumultX:
 
 [rewrite_local]
@@ -106,7 +100,6 @@ class UserInfo {
             //post方法
             let res = await this.Request(options, "post");
             var reg = /data-nonce=\"(.*)\" data-toggle=\"tooltip\" data-placement=\"bottom\" title=\"每日签到奖励: 0.2积分\"\>/;
-            $.log(res);
             if (res?.search(reg) != -1) {
                 this.nonceVal = reg.exec(res)[1];
                 debug(this.nonceVal);
