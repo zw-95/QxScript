@@ -45,7 +45,6 @@ let host = 'iios.songshuyouxi.com';
 
 //脚本入口函数main()
 async function main() {
-    await getNotice()
     console.log('\n================== 任务 ==================\n');
     for (let user of userList) {
         DoubleLog(`🔷账号${user.index} >> Start work`)
@@ -97,13 +96,14 @@ class UserInfo {
         try {
             const options = {
                 //签到任务调用签到接口
-                url: `https://${host}/user1`,
+                url: `https://${host}/user`,
                 //请求头, 所有接口通用
                 headers: this.headers
             };
             //post方法
             let res = await this.Request(options, "post");
             var reg = /data-nonce=\"(.*)\" data-toggle=\"tooltip\" data-placement=\"bottom\" title=\"每日签到奖励: 0.2积分\"\>/;
+            $.log(res);
             if (res?.search(reg) != -1) {
                 this.nonceVal = reg.exec(res)[1];
                 debug(this.nonceVal);
@@ -166,25 +166,6 @@ async function getCookie() {
         } else {
             $.msg($.name, "", "错误获取签到Cookie失败");
         }
-    }
-}
-
-
-async function getNotice() {
-    try {
-        const urls = ["https://raw.githubusercontent.com/Sliverkiss/GoodNight/main/notice.json", "https://raw.githubusercontent.com/Sliverkiss/GoodNight/main/tip.json"];
-        for (const url of urls) {
-            const options = {
-                url,
-                headers: {
-                    "User-Agent": ""
-                },
-            }
-            const result = await httpRequest(options);
-            if (result) console.log(result.notice);
-        }
-    } catch (e) {
-        console.log(e);
     }
 }
 
