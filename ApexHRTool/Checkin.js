@@ -17,7 +17,7 @@ QX 1.0.10+ :
 
 [rewrite_local]
 #顶点HR签到Cookie
-^https:\/\/hrtool\.apexsoft\.com\.cn\/ ^GET url-and-header script-request-header https://raw.githubusercontent.com/zw-95/QxScript/master/ApexHRTool/Checkin.js
+^https:\/\/hrtool\.apexsoft\.com\.cn\/register\/workAttendance\/query ^GET url-and-header script-request-header http://192.168.10.19:5500/ApexHRTool/Checkin.js
 
 [mitm]
 hostname = hrtool.apexsoft.com.cn
@@ -59,7 +59,7 @@ async function main() {
       return;
     }
     await user.checkSignRecord();
-    if(!user.checkStat){
+    if(user.checkStat){
       $.log(`❌账号${user.index} >> 校验签到记录失败!`)
       return;
     }
@@ -116,7 +116,7 @@ class UserInfo {
           const toDay = formatTimestamp(Math.floor(now / 1000));
           const tomorrow = formatTimestamp(Math.floor((now + 24 * 60 * 60 * 1000) / 1000));
           const options = {
-              url: `https://${hrHost}/register/workAttendance/query?beginDate=${toDay} 03:00:00&endDate=${tomorrow} 02:59:59&type=1`,
+              url: `https://${hrHost}/register/workAttendance/query?beginDate=${toDay}${encodeURI(' 03:00:00')}&endDate=${tomorrow}${encodeURI(' 02:59:59')}&type=1`,
               //请求头, 所有接口通用
               headers: this.headers
           };
@@ -154,12 +154,13 @@ class UserInfo {
             headers: this.headers
         };
         let res = await this.Request(options, "get");
-        debug(res);
+
         var body = res;
         if (body.code == 1 && body.records.length > 0) {
           var posi = body.records.find(v=>v.note.indexOf('武汉顶点') != -1 && v.longitude && v.latitude);
           if(posi){
-            var randomPosi = generateRandomCoordinates(posi.latitude,posi.longitude,distance)
+            debug(posi);
+            var randomPosi = generateRandomCoordinates(parseFloat(posi.latitude),parseFloat(posi.longitude),distance);
             this.signRandomPosiLat = randomPosi.latitude;
             this.signRandomPosiLon = randomPosi.longitude;
             this.signCorpName = posi.note;
@@ -175,9 +176,10 @@ class UserInfo {
             //post方法
             let posiNameRes = await this.Request(getPosiNameOptions, "get");
             var posiNameBody = posiNameRes;
-            debug(posiNameRes);
+            
             if(posiNameBody && posiNameBody.status === 0){
               this.posiName = posiNameBody.result.formatted_addresses.standard_address || '';
+             debug(`${this.posiName}`, 'posiName')
             }
             if(this.posiName == null || this.posiName == ''){
               $.Messages.push(`获取签到地点名称失败！`)
@@ -219,7 +221,7 @@ class UserInfo {
         var errorSignCount = 0;
         var now = new Date();
         const toDay = formatTimestamp(Math.floor(now / 1000));
-        const nextMth = formatTimestamp(Math.floor((now + 30 * 24 * 60 * 60 * 1000) / 1000));
+        const nextMth = formatTimestamp(Math.floor(now/1000) + 30 * 24 * 60 * 60 );
         const options = {
             url: `https://${hrHost}/register/attendance/t98/query?beginDate=${toDay}&endDate=${nextMth}&pageSize=35&pageNum=1`,
             //请求头, 所有接口通用
@@ -256,6 +258,7 @@ class UserInfo {
             businessTrip : 1
           }
       };*/
+      debug(`签到地点：[${this.signCorpName}]${this.posiName}`);
       const options = {
           url: `https://${hrHost}/register/attendance/position/query`,
           //请求头, 所有接口通用
@@ -267,7 +270,7 @@ class UserInfo {
       debug(res);
       var body = res;
       if(body){
-        return {code:1,note:`打卡成功`};
+        return {code:1,note:`打卡成功, 打卡地点:[${this.signCorpName}]${this.posiName}`};
         // return body;
       }else{
         return {code:-1,note:`调取打卡接口失败`};
@@ -306,7 +309,7 @@ async function getCookie() {
 })()
   .catch((e) => {
      // 错误消息
-    const errorMessage = e.message || e;
+    const errorMessage = e.message || $.toStr(e) || e;
     // 堆栈跟踪信息
     const errorStack = e.stack || "No stack trace available";
     
@@ -348,11 +351,11 @@ function debug(text, title = 'debug') {
       if (typeof text == "string") {
           console.log(`\n-----------${title}------------\n`);
           console.log(text);
-          console.log(`\n-----------${title}------------\n`);
+          console.log(`\n-----------${title}  end------------\n`);
       } else if (typeof text == "object") {
           console.log(`\n-----------${title}------------\n`);
           console.log($.toStr(text));
-          console.log(`\n-----------${title}------------\n`);
+          console.log(`\n-----------${title} end------------\n`);
       }
   }
 }
