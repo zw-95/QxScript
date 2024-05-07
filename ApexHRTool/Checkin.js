@@ -17,7 +17,7 @@ QX 1.0.10+ :
 
 [rewrite_local]
 #顶点HR签到Cookie
-^https:\/\/hrtool\.apexsoft\.com\.cn\/register\/workAttendance\/query ^GET url-and-header script-request-header https://raw.githubusercontent.com/zw-95/QxScript/master/ApexHRTool/Checkin.js
+^https:\/\/hrtool\.apexsoft\.com\.cn\/ ^GET url-and-header script-request-header https://raw.githubusercontent.com/zw-95/QxScript/master/ApexHRTool/Checkin.js
 
 [mitm]
 hostname = hrtool.apexsoft.com.cn
