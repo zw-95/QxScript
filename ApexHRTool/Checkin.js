@@ -116,7 +116,7 @@ class UserInfo {
           const toDay = formatTimestamp(Math.floor(now / 1000));
           const tomorrow = formatTimestamp(Math.floor((now + 24 * 60 * 60 * 1000) / 1000));
           const options = {
-              url: `https://${hrHost}/register/workAttendance/query?beginDate=${toDay} 03:00:00&endDate=${tomorrow} 02:59:59&type=1`,
+              url: `https://${hrHost}/register/workAttendance/query?beginDate=${toDay}${encodeURI('03:00:00')}&endDate=${tomorrow}${encodeURI('02:59:59')}&type=1`,
               //请求头, 所有接口通用
               headers: this.headers
           };
@@ -231,7 +231,7 @@ class UserInfo {
         };
         let res = await this.Request(options, "get");
         var body = res;
-        debug(res);
+        debug(res,'当月签到记录返回');
         if (body.code == 1) {
           errorSignCount = body.records.filter(v=>v.f6CN !=='正常上下班').length;
         }else{
@@ -245,34 +245,30 @@ class UserInfo {
   //签到
   async signIn() {
     try {
-      /*const options = {
+      const options = {
           url: `https://${hrHost}/register/workAttendance/add`,
           //请求头, 所有接口通用
           headers: this.headers,
           body: {
-            address : `[${signCorpName}]${posiName}`,
-            longitude : this.longitude,
+            address : `[${this.signCorpName}]${this.posiName}`,
+            longitude : this.signRandomPosiLon,
             note : "",
             inRange : 1,
             model : -1,
-            latitude : this.latitude,
+            latitude : this.signRandomPosiLat,
             type : 1,
             businessTrip : 1
           }
-      };*/
-      const options = {
-          url: `https://${hrHost}/register/attendance/position/query`,
-          //请求头, 所有接口通用
-          headers: this.headers
       };
+      debug(options,'签到打卡请求')
+      
       //post方法
-      // let res = await this.Request(options, "post");
-      let res = await this.Request(options, "get");
-      debug(res);
+      let res = await this.Request(options, "post");
+      //let res = await this.Request(options, "get");
+      debug(res,'签到打卡返回');
       var body = res;
       if(body){
-        return {code:1,note:`打卡成功`};
-        // return body;
+        return body;
       }else{
         return {code:-1,note:`调取打卡接口失败`};
       }
