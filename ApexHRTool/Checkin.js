@@ -8,17 +8,7 @@
 说明：
 打开顶点HR小程序，或者已登录的刷新首页
 
-脚本将在[08:38 和 18:40, 星期一至星期五]执行，随机延迟0s-3min。 您可以修改执行时间。
-~~~~~~~~~~~~~~~~
-QX 1.0.10+ 本地:
-
-[task_local]
-40 8,18 * * 1-5 http://192.168.137.1:5500/ApexHRTool/Checkin.js, tag=顶点HR签到
-
-[rewrite_local]
-#顶点HR签到Cookie
-^https:\/\/hrtool\.apexsoft\.com\.cn\/ ^GET url-and-header script-request-header http://192.168.137.1:5500/ApexHRTool/Checkin.js
-
+脚本将在[08:38 和 18:40, 星期一至星期五]执行，随机延迟10-120s。 您可以调整参数。
 ~~~~~~~~~~~~~~~~
 QX 1.0.10+ :
 
@@ -47,12 +37,15 @@ let userIdx = 0
 let userList = []
 let userCount = 0
 const distance = 100 // 单位m
+const minTimeout = 10 // 单位s
+const maxTimeout = 120 // 单位s
 let envSplitor = ['@'] //多账号分隔符
 
 $.Messages = []
 $.msgBody = ''
 //调试
-$.is_debug = 'true'
+$.is_debug = 'false'
+//是否真实打卡
 $.is_signIn = 'true'
 
 //脚本入口函数main()
@@ -60,16 +53,13 @@ async function main() {
   $.log('\n================== 任务 ==================\n')
   for (let user of userList) {
     $.log(`🔷账号${user.user} >> 开始任务`)
-    $.log(`随机延迟${user.getRandomTime()}ms`)
+    var randomTimeout = user.getRandomTime();
+    $.log(`随机延迟 ${randomTimeout} 秒`)
+    await $.wait(randomTimeout*1000); //延迟
     //执行签到
     await user.checkLog()
     if (!user.logStat) {
       $.log(`❌账号${user.user} >> 校验日志填写失败!`)
-      return
-    }
-    await user.checkPosiConfig()
-    if (!user.posiStat) {
-      $.log(`❌账号${user.user} >> 校验位置失败!`)
       return
     }
     await user.checkSignRecord()
@@ -77,6 +67,12 @@ async function main() {
       $.log(`❌账号${user.user} >> 校验签到记录失败!`)
       return
     }
+    await user.checkPosiConfig()
+    if (!user.posiStat) {
+      $.log(`❌账号${user.user} >> 校验位置失败!`)
+      return
+    }
+
     let signInRecord = await user.signIn()
     if (signInRecord) {
       $.Messages.push(`${signInRecord.code > 0 ? '✅' : '❌'}${signInRecord.note}`)
@@ -102,7 +98,7 @@ class UserInfo {
     this.cookie = str
     this.user = userStr
     this.logStat = false
-    this.checkStat = true
+    this.checkStat = false
     this.posiStat = false
     this.signCorpName = ''
     this.posiName = ''
@@ -116,9 +112,8 @@ class UserInfo {
       // 'Content-Type': 'application/json'
     }
   }
-  // 1s-3min
   getRandomTime() {
-    return randomInt(1000, 3 * 60 * 1000)
+    return randomInt(minTimeout, maxTimeout)
   }
   //请求二次封装
   Request(options, method) {
@@ -137,16 +132,18 @@ class UserInfo {
   async checkSignRecord() {
     try {
       var now = Math.floor(new Date() / 1000)
+      const toDay = formatTimestamp(now)
       const tomorrow = formatTimestamp(Math.floor(now + 24 * 60 * 60))
       const options = {
         url: `https://${hrHost}/register/workAttendance/query?beginDate=${toDay}${encodeURI('03:00:00')}&endDate=${tomorrow}${encodeURI('02:59:59')}&type=1`,
         //请求头, 所有接口通用
         headers: this.headers,
       }
+      debug(options, `查询当日签到记录请求`)
       let res = await this.Request(options, 'get')
       debug(res, `查询当日签到记录结果`)
       var body = res
-      var hours = now.getHours()
+      var hours = new Date().getHours()
       if (body.code == 1) {
         if (hours >= 0 && hours < 12) {
           // 上午
@@ -178,7 +175,9 @@ class UserInfo {
         //请求头, 所有接口通用
         headers: this.headers,
       }
+      debug(options, `查询签到位置配置请求`)
       let res = await this.Request(options, 'get')
+      debug(res, `查询签到位置配置返回`)
 
       var body = res
       if (body.code == 1 && body.records.length > 0) {
@@ -198,10 +197,9 @@ class UserInfo {
             //请求头, 所有接口通用
             headers: this.headers,
           }
-          //post方法
+          debug(getPosiNameOptions, `查询随机位置名称请求`)
           let posiNameRes = await this.Request(getPosiNameOptions, 'get')
           var posiNameBody = posiNameRes
-          debug(getPosiNameOptions, `查询随机位置名称请求`)
           debug(posiNameRes, `查询随机位置名称结果`)
           if (posiNameBody && posiNameBody.status === 0) {
             this.posiName = posiNameBody.result.formatted_addresses.standard_address || ''
@@ -226,13 +224,14 @@ class UserInfo {
       const options = {
         url: `https://${hrHost}/workLog/check`,
         //请求头, 所有接口通用
-        headers: this.headers,
-        body: {},
+        headers: {...this.headers,'Content-Type':'application/json'},
+        body: $.toStr({}),
       }
+      debug(options, `查询日志校验请求`)
       let res = await this.Request(options, 'post')
-      var body = res
       debug(res, `查询日志校验结果`)
-      if (body.code == 1) {
+      var body = res
+      if (body.code>=0) {
         this.logStat = true
       } else {
         $.Messages.push(`请填写日志后重试:${body.note}`)
@@ -253,9 +252,10 @@ class UserInfo {
         //请求头, 所有接口通用
         headers: this.headers,
       }
+      debug(options, '当月签到记录请求')
       let res = await this.Request(options, 'get')
-      var body = res
       debug(res, '当月签到记录结果')
+      var body = res
       if (body) {
         if (body.code == 1) {
           errorSignCount = body.records.filter((v) => v.f6CN !== '正常上下班').length
@@ -271,11 +271,12 @@ class UserInfo {
     // debug模式不真的打卡
     if ($.is_signIn !== 'true') {
       try {
-        let res = await this.getCmthErrorCount()
+        await $.wait(1000)
         debug(res, '模拟签到打卡结果')
-        var body = res
+        var body = { code: 1, note: `模拟打卡成功` }
+        // var body = { code: -1, note: `调取打卡接口失败` }
         if (body) {
-          return { code: body.code, note: `模拟打卡${body.code}` }
+          return body
         } else {
           return { code: -1, note: `调取打卡接口失败` }
         }
@@ -287,23 +288,20 @@ class UserInfo {
         const options = {
           url: `https://${hrHost}/register/workAttendance/add`,
           //请求头, 所有接口通用
-          headers: this.headers,
-          body: {
+          headers: {...this.headers,'Content-Type':'application/json'},
+          body: $.toStr({
             address: `[${this.signCorpName}]${this.posiName}`,
             longitude: this.signRandomPosiLon,
-            note: '',
+            note: "",
             inRange: 1,
             model: -1,
             latitude: this.signRandomPosiLat,
             type: 1,
             businessTrip: 1,
-          },
+          }),
         }
         debug(options, '签到打卡请求')
-
-        //post方法
         let res = await this.Request(options, 'post')
-        //let res = await this.Request(options, "get");
         debug(res, '签到打卡结果')
         var body = res
         if (body) {
