@@ -10,6 +10,16 @@
 
 脚本将在[08:38 和 18:40, 星期一至星期五]执行，随机延迟0s-3min。 您可以修改执行时间。
 ~~~~~~~~~~~~~~~~
+QX 1.0.10+ 本地:
+
+[task_local]
+40 8,18 * * 1-5 http://192.168.137.1:5500/ApexHRTool/Checkin.js, tag=顶点HR签到
+
+[rewrite_local]
+#顶点HR签到Cookie
+^https:\/\/hrtool\.apexsoft\.com\.cn\/ ^GET url-and-header script-request-header http://192.168.137.1:5500/ApexHRTool/Checkin.js
+
+~~~~~~~~~~~~~~~~
 QX 1.0.10+ :
 
 [task_local]
@@ -25,255 +35,285 @@ hostname = hrtool.apexsoft.com.cn
 */
 
 const $ = new Env(`顶点HR`)
-const ckName = "apex_hr_Cookies";
-let userCookie = $.getdata(ckName) || '' // 顶点HR签到Cookie
-const hrHost = "hrtool.apexsoft.com.cn"
-const tencentMapHost = "apis.map.qq.com"
-const tencentMapApiKey = "QDLBZ-VVF6S-NIKO3-6LVNV-CQHVS-3HFEQ" // 暂时不知道从哪取的
+const ckName = 'apex_hr_Cookies'
+const xAuthUserName = 'apex_hr_User'
+let userCookie = $.getdata(ckName) || ''
+let xAuthUser = $.getdata(xAuthUserName) || ''
+const hrHost = 'hrtool.apexsoft.com.cn'
+const tencentMapHost = 'apis.map.qq.com'
+const tencentMapApiKey = 'QDLBZ-VVF6S-NIKO3-6LVNV-CQHVS-3HFEQ' // 暂时不知道从哪取的
 const barkKey = '' //Bark APP 通知推送Key
-let userIdx = 0;
-let userList = [];
-let userCount = 0;
-const distance = 100;// 单位m
-let envSplitor = ["@"]; //多账号分隔符
+let userIdx = 0
+let userList = []
+let userCount = 0
+const distance = 100 // 单位m
+let envSplitor = ['@'] //多账号分隔符
 
 $.Messages = []
 $.msgBody = ''
 //调试
-$.is_debug = 'true';
+$.is_debug = 'true'
+$.is_signIn = 'true'
+
 //脚本入口函数main()
 async function main() {
-  $.log('\n================== 任务 ==================\n');
+  $.log('\n================== 任务 ==================\n')
   for (let user of userList) {
-    $.log(`🔷账号${user.index} >> 开始任务`)
-    $.log(`随机延迟${user.getRandomTime()}ms`);
+    $.log(`🔷账号${user.user} >> 开始任务`)
+    $.log(`随机延迟${user.getRandomTime()}ms`)
     //执行签到
-    await user.checkLog();
-    if(!user.logStat){
-      $.log(`❌账号${user.index} >> 校验日志填写失败!`)
-      return;
+    await user.checkLog()
+    if (!user.logStat) {
+      $.log(`❌账号${user.user} >> 校验日志填写失败!`)
+      return
     }
-    await user.checkPosiConfig();
-    if(!user.posiStat){
-      $.log(`❌账号${user.index} >> 校验位置失败!`)
-      return;
+    await user.checkPosiConfig()
+    if (!user.posiStat) {
+      $.log(`❌账号${user.user} >> 校验位置失败!`)
+      return
     }
-    await user.checkSignRecord();
-    if(!user.checkStat){
-      $.log(`❌账号${user.index} >> 校验签到记录失败!`)
-      return;
+    await user.checkSignRecord()
+    if (!user.checkStat) {
+      $.log(`❌账号${user.user} >> 校验签到记录失败!`)
+      return
     }
-    let signInRecord = await user.signIn();
-    $.Messages.push(`${signInRecord.code > 0 ? '✅' : '❌'}${signInRecord.note}`);
+    let signInRecord = await user.signIn()
+    if (signInRecord) {
+      $.Messages.push(`${signInRecord.code > 0 ? '✅' : '❌'}${signInRecord.note}`)
+    } else {
+      $.log(`❌账号${user.user} >> 签到失败!`)
+    }
 
-    let errorSignCount = await user.getCmthErrorCount();
-    $.log(`⚠本月考勤异常 ${errorSignCount} 天`)
-    if(errorSignCount > 0 ){
-      $.Messages.push(`⚠本月考勤异常 ${errorSignCount} 天，请及时处理`);
+    let errorSignCount = await user.getCmthErrorCount()
+    if (errorSignCount) {
+      $.log(`⚠本月考勤异常 ${errorSignCount} 天`)
+      if (errorSignCount > 0) {
+        $.Messages.push(`⚠本月考勤异常 ${errorSignCount} 天，请及时处理`)
+      }
+    } else {
+      $.log(`❌账号${user.user} >> 查询本月签到记录失败!`)
     }
   }
 }
 
 class UserInfo {
-  constructor(str) {
-      this.index = ++userIdx;
-      this.cookie = str;
-      this.logStat = false;
-      this.checkStat = false;
-      this.posiStat = false;
-      this.signCorpName = '';
-      this.posiName = '';
-      this.signRandomPosiLat = 0;
-      this.signRandomPosiLon = 0;
-      this.headers = {
-          'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 MicroMessenger/8.0.48(0x18003013) NetType/4G Language/zh_CN',
-          Cookie: this.cookie
-          // 'x-auth-user': this.xAuthUser,
-          // 'Content-Type': 'application/json'
-      }
+  constructor(str, userStr) {
+    this.index = ++userIdx
+    this.cookie = str
+    this.user = userStr
+    this.logStat = false
+    this.checkStat = true
+    this.posiStat = false
+    this.signCorpName = ''
+    this.posiName = ''
+    this.signRandomPosiLat = 0
+    this.signRandomPosiLon = 0
+    this.headers = {
+      'User-Agent':
+        'Mozilla/5.0 (iPhone; CPU iPhone OS 16_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 MicroMessenger/8.0.48(0x18003013) NetType/4G Language/zh_CN',
+      Cookie: this.cookie,
+      'x-auth-user': this.user,
+      // 'Content-Type': 'application/json'
+    }
   }
   // 1s-3min
   getRandomTime() {
-    return randomInt(1000, 3*60*1000)
+    return randomInt(1000, 3 * 60 * 1000)
   }
   //请求二次封装
   Request(options, method) {
-      typeof (method) === 'undefined' ? ('body' in options ? method = 'post' : method = 'get') : method = method;
-      return new Promise((resolve, reject) => {
-          $.http[method.toLowerCase()](options)
-              .then((response) => {
-                  let res = response.body;
-                  res = $.toObj(res) || res;
-                  resolve(res);
-              })
-              .catch((err) => reject(err));
-      });
+    typeof method === 'undefined' ? ('body' in options ? (method = 'post') : (method = 'get')) : (method = method)
+    return new Promise((resolve, reject) => {
+      $.http[method.toLowerCase()](options)
+        .then((response) => {
+          let res = response.body
+          res = $.toObj(res) || res
+          resolve(res)
+        })
+        .catch((err) => reject(err))
+    })
   }
   //验证当日签到记录
   async checkSignRecord() {
-      try {
-          var now = new Date();
-          const toDay = formatTimestamp(Math.floor(now / 1000));
-          const tomorrow = formatTimestamp(Math.floor((now + 24 * 60 * 60 * 1000) / 1000));
-          const options = {
-              url: `https://${hrHost}/register/workAttendance/query?beginDate=${toDay}${encodeURI('03:00:00')}&endDate=${tomorrow}${encodeURI('02:59:59')}&type=1`,
-              //请求头, 所有接口通用
-              headers: this.headers
-          };
-          let res = await this.Request(options, "get");
-          debug(res);
-          var body = res;
-          var hours = now.getHours();
-          if (body.code == 1) {
-            if (hours >= 0 && hours < 12) {
-              // 上午
-              if (body.records.length == 0 ){
-                this.checkStat = true;
-              }else{
-                $.Messages.push(`上午已经签过到了！`)
-              }
-            } else {
-              // 下午
-              if (body.records.length == 1 ){
-                this.checkStat = true;
-              }else{
-                $.Messages.push(`下午已经签过到了！`)
-              }
-            }
-          }
-      } catch (e) {
-          throw e;
+    try {
+      var now = Math.floor(new Date() / 1000)
+      const tomorrow = formatTimestamp(Math.floor(now + 24 * 60 * 60))
+      const options = {
+        url: `https://${hrHost}/register/workAttendance/query?beginDate=${toDay}${encodeURI('03:00:00')}&endDate=${tomorrow}${encodeURI('02:59:59')}&type=1`,
+        //请求头, 所有接口通用
+        headers: this.headers,
       }
+      let res = await this.Request(options, 'get')
+      debug(res, `查询当日签到记录结果`)
+      var body = res
+      var hours = now.getHours()
+      if (body.code == 1) {
+        if (hours >= 0 && hours < 12) {
+          // 上午
+          if (body.records.length == 0) {
+            this.checkStat = true
+          } else {
+            $.Messages.push(`上午已经签过到了！`)
+            $.log(`上午已经签过到了！`)
+          }
+        } else {
+          // 下午
+          if (body.records.length == 1) {
+            this.checkStat = true
+          } else {
+            $.Messages.push(`下午已经签过到了！`)
+            $.log(`下午已经签过到了！`)
+          }
+        }
+      }
+    } catch (e) {
+      throw e
+    }
   }
   //查询签到位置，取武汉那一条
   async checkPosiConfig() {
     try {
-        const options = {
-            url: `https://${hrHost}/register/attendance/position/query`,
-            //请求头, 所有接口通用
-            headers: this.headers
-        };
-        let res = await this.Request(options, "get");
-        
-        var body = res;
-        if (body.code == 1 && body.records.length > 0) {    
-          var posi = body.records.find(v=>v.note.indexOf('武汉顶点') != -1 && v.longitude && v.latitude);
-          if(posi){
-            $.log(`签到公司名：${posi.note}`)
-            var randomPosi = generateRandomCoordinates(parseFloat(posi.latitude),parseFloat(posi.longitude),distance)
-            this.signRandomPosiLat = randomPosi.latitude;
-            this.signRandomPosiLon = randomPosi.longitude;
-            this.signCorpName = posi.note;
-            if(this.signCorpName == null || this.signCorpName == ''){
-              $.Messages.push(`获取签到分公司名称失败！`)
-              return;
-            }
-            const getPosiNameOptions = {
-              url: `https://${tencentMapHost}/ws/geocoder/v1/?location=${this.signRandomPosiLat},${this.signRandomPosiLon}&key=${tencentMapApiKey}`,
-              //请求头, 所有接口通用
-              headers: this.headers
-            };
-            //post方法
-            let posiNameRes = await this.Request(getPosiNameOptions, "get");
-            var posiNameBody = posiNameRes;
-            debug(posiNameRes);
-            debug(getPosiNameOptions);
-            if(posiNameBody && posiNameBody.status === 0){
-              
-              this.posiName = posiNameBody.result.formatted_addresses.standard_address || '';
-              $.log(`签到地点名称：${this.posiName}`)
-            }
-            if(this.posiName == null || this.posiName == ''){
-              $.Messages.push(`获取签到地点名称失败！`)
-              return;
-            }
-            this.posiStat = true;
+      const options = {
+        url: `https://${hrHost}/register/attendance/position/query`,
+        //请求头, 所有接口通用
+        headers: this.headers,
+      }
+      let res = await this.Request(options, 'get')
+
+      var body = res
+      if (body.code == 1 && body.records.length > 0) {
+        var posi = body.records.find((v) => v.note.indexOf('武汉顶点') != -1 && v.longitude && v.latitude)
+        if (posi) {
+          $.log(`签到公司名：${posi.note}`)
+          var randomPosi = generateRandomCoordinates(parseFloat(posi.latitude), parseFloat(posi.longitude), distance)
+          this.signRandomPosiLat = randomPosi.latitude
+          this.signRandomPosiLon = randomPosi.longitude
+          this.signCorpName = posi.note
+          if (this.signCorpName == null || this.signCorpName == '') {
+            $.Messages.push(`获取签到分公司名称失败！`)
+            return
           }
-        } else {
-          $.Messages.push(`获取公司签到信息失败！`)
+          const getPosiNameOptions = {
+            url: `https://${tencentMapHost}/ws/geocoder/v1/?location=${this.signRandomPosiLat},${this.signRandomPosiLon}&key=${tencentMapApiKey}`,
+            //请求头, 所有接口通用
+            headers: this.headers,
+          }
+          //post方法
+          let posiNameRes = await this.Request(getPosiNameOptions, 'get')
+          var posiNameBody = posiNameRes
+          debug(getPosiNameOptions, `查询随机位置名称请求`)
+          debug(posiNameRes, `查询随机位置名称结果`)
+          if (posiNameBody && posiNameBody.status === 0) {
+            this.posiName = posiNameBody.result.formatted_addresses.standard_address || ''
+            $.log(`签到地点名称：${this.posiName}`)
+          }
+          if (this.posiName == null || this.posiName == '') {
+            $.Messages.push(`获取签到地点名称失败！`)
+            return
+          }
+          this.posiStat = true
         }
+      } else {
+        $.Messages.push(`获取公司签到信息失败！`)
+      }
     } catch (e) {
-        throw e;
+      throw e
     }
   }
   //查询日志，校验是否可以打卡
   async checkLog() {
-      try {
-          const options = {
-              url: `https://${hrHost}/workLog/check`,
-              //请求头, 所有接口通用
-              headers: this.headers,
-              body:{}
-          };
-          let res = await this.Request(options, "post");
-          var body = res;
-          if (body.code == 1) {
-            this.logStat = true;
-            debug(this.body);
-          }else{
-            $.Messages.push(`请填写日志后重试:${body.note}`)
-          }
-      } catch (e) {
-          throw e;
+    try {
+      const options = {
+        url: `https://${hrHost}/workLog/check`,
+        //请求头, 所有接口通用
+        headers: this.headers,
+        body: {},
       }
+      let res = await this.Request(options, 'post')
+      var body = res
+      debug(res, `查询日志校验结果`)
+      if (body.code == 1) {
+        this.logStat = true
+      } else {
+        $.Messages.push(`请填写日志后重试:${body.note}`)
+      }
+    } catch (e) {
+      throw e
+    }
   }
   //查询本月签到记录，查出不正常的天数
   async getCmthErrorCount() {
     try {
-        var errorSignCount = 0;
-        var now = new Date();
-        const toDay = formatTimestamp(Math.floor(now / 1000));
-        const nextMth = formatTimestamp(Math.floor((now + 30 * 24 * 60 * 60 * 1000) / 1000));
-        const options = {
-            url: `https://${hrHost}/register/attendance/t98/query?beginDate=${toDay}&endDate=${nextMth}&pageSize=35&pageNum=1`,
-            //请求头, 所有接口通用
-            headers: this.headers
-        };
-        let res = await this.Request(options, "get");
-        var body = res;
-        debug(res,'当月签到记录返回');
+      var errorSignCount
+      var now = Math.floor(new Date() / 1000)
+      const toDay = formatTimestamp(now)
+      const nextMth = formatTimestamp(Math.floor(now + 30 * 24 * 60 * 60))
+      const options = {
+        url: `https://${hrHost}/register/attendance/t98/query?beginDate=${toDay}&endDate=${nextMth}&pageSize=35&pageNum=1`,
+        //请求头, 所有接口通用
+        headers: this.headers,
+      }
+      let res = await this.Request(options, 'get')
+      var body = res
+      debug(res, '当月签到记录结果')
+      if (body) {
         if (body.code == 1) {
-          errorSignCount = body.records.filter(v=>v.f6CN !=='正常上下班').length;
-        }else{
-          $.Messages.push(`查询当月签到记录失败`)
+          errorSignCount = body.records.filter((v) => v.f6CN !== '正常上下班').length
         }
-        return errorSignCount;
+      }
+      return errorSignCount
     } catch (e) {
-        throw e;
+      throw e
     }
   }
   //签到
   async signIn() {
-    try {
-      const options = {
+    // debug模式不真的打卡
+    if ($.is_signIn !== 'true') {
+      try {
+        let res = await this.getCmthErrorCount()
+        debug(res, '模拟签到打卡结果')
+        var body = res
+        if (body) {
+          return { code: body.code, note: `模拟打卡${body.code}` }
+        } else {
+          return { code: -1, note: `调取打卡接口失败` }
+        }
+      } catch (e) {
+        throw e
+      }
+    } else {
+      try {
+        const options = {
           url: `https://${hrHost}/register/workAttendance/add`,
           //请求头, 所有接口通用
           headers: this.headers,
           body: {
-            address : `[${this.signCorpName}]${this.posiName}`,
-            longitude : this.signRandomPosiLon,
-            note : "",
-            inRange : 1,
-            model : -1,
-            latitude : this.signRandomPosiLat,
-            type : 1,
-            businessTrip : 1
-          }
-      };
-      debug(options,'签到打卡请求')
-      
-      //post方法
-      let res = await this.Request(options, "post");
-      //let res = await this.Request(options, "get");
-      debug(res,'签到打卡返回');
-      var body = res;
-      if(body){
-        return body;
-      }else{
-        return {code:-1,note:`调取打卡接口失败`};
+            address: `[${this.signCorpName}]${this.posiName}`,
+            longitude: this.signRandomPosiLon,
+            note: '',
+            inRange: 1,
+            model: -1,
+            latitude: this.signRandomPosiLat,
+            type: 1,
+            businessTrip: 1,
+          },
+        }
+        debug(options, '签到打卡请求')
+
+        //post方法
+        let res = await this.Request(options, 'post')
+        //let res = await this.Request(options, "get");
+        debug(res, '签到打卡结果')
+        var body = res
+        if (body) {
+          return body
+        } else {
+          return { code: -1, note: `调取打卡接口失败` }
+        }
+      } catch (e) {
+        throw e
       }
-    } catch (e) {
-        throw e;
     }
   }
 }
@@ -281,134 +321,145 @@ class UserInfo {
 //获取Cookie
 async function getCookie() {
   if ($request && $request.method != 'OPTIONS') {
-      const tokenValue = $request.headers['Cookie'] || $request.headers['cookie'];
-      if (tokenValue) {
-          $.setdata(tokenValue, ckName);
-          $.msg($.name, "", `获取顶点HR Cookie[${tokenValue}]成功🎉`);
-      } else {
-          $.msg($.name, "", "错误获取顶点HR Cookie失败");
-      }
+    const tokenValue = $request.headers['Cookie'] || $request.headers['cookie']
+    xAuthUser = $request.headers['x-auth-user'] || $request.headers['x-Auth-User']
+    if (tokenValue && xAuthUser) {
+      $.setdata(tokenValue, ckName)
+      $.setdata(xAuthUser, xAuthUserName)
+      $.msg($.name, '', `获取顶点HR Cookie[${tokenValue}], x-Auth-User[${xAuthUser}] 成功🎉`)
+    } else {
+      $.msg($.name, '', '错误获取顶点HR Cookie失败')
+    }
   }
 }
 
 //主程序执行入口
 !(async () => {
   //没有设置变量,执行Cookie获取
-  if (typeof $request != "undefined") {
-      await getCookie();
-      return;
+  if (typeof $request != 'undefined') {
+    await getCookie()
+    return
   }
   //未检测到ck，退出
-  if (!(await checkEnv())) { throw new Error(`❌未检测到Cookie`) };
+  if (!(await checkEnv())) {
+    throw new Error(`❌未检测到Cookie`)
+  }
   if (userList.length > 0) {
-      await main();
+    await main()
   }
 })()
   .catch((e) => {
-     // 错误消息
-    const errorMessage = e.message || $.toStr(e) || e;
+    // 错误消息
+    const errorMessage = e.message || $.toStr(e) || e
     // 堆栈跟踪信息
-    const errorStack = e.stack || "No stack trace available";
-    
+    const errorStack = e.stack || 'No stack trace available'
+
     // 将错误消息和堆栈跟踪信息一起添加到消息数组
-    $.Messages.push(`Error: ${errorMessage}\nStack Trace: ${errorStack}`);
-    
+    $.Messages.push(`Error: ${errorMessage}\nStack Trace: ${errorStack}`)
+
     // 如果需要，也可以单独输出错误消息和堆栈跟踪信息
-    $.log(`Error: ${errorMessage}`);
-    $.log(`Stack Trace: ${errorStack}`);
-  })//捕获登录函数等抛出的异常, 并把原因添加到全局变量(通知)
+    $.log(`Error: ${errorMessage}`)
+    $.log(`Stack Trace: ${errorStack}`)
+  }) //捕获登录函数等抛出的异常, 并把原因添加到全局变量(通知)
   .finally(async () => {
-      if ($.barkKey) { //如果已填写Bark Key
-          await BarkNotify($, $.barkKey, $.name, $.Messages.join('\n')); //推送Bark通知
-      };
-      await $.msg($.name, ``,$.Messages.join('\n'))//带上总结推送通知
-      $.done(); //调用Surge、QX内部特有的函数, 用于退出脚本执行
-  });
+    if ($.Messages.length > 0) {
+      if ($.barkKey) {
+        //如果已填写Bark Key
+        await BarkNotify($, $.barkKey, $.name, $.Messages.join('\n')) //推送Bark通知
+      }
+      await $.msg($.name, ``, $.Messages.join('\n')) //带上总结推送通知
+    }
+    $.done() //调用Surge、QX内部特有的函数, 用于退出脚本执行
+  })
 
 //检查变量
 async function checkEnv() {
-  if (userCookie) {
-      let e = envSplitor[0];
-      for (let o of envSplitor)
-          if (userCookie.indexOf(o) > -1) {
-              e = o;
-              break;
-          }
-      for (let n of userCookie.split(e)) n && userList.push(new UserInfo(n));
-      userCount = userList.length;
+  if (userCookie && xAuthUser) {
+    let e = envSplitor[0]
+    for (let o of envSplitor)
+      if (userCookie.indexOf(o) > -1) {
+        e = o
+        break
+      }
+    var cookies = userCookie.split(e)
+    for (let n of cookies) {
+      var user = xAuthUser.split(e)[cookies.indexOf(n)]
+      n && user && userList.push(new UserInfo(n, parseInt(user)))
+    }
+    userCount = userList.length
   } else {
-      console.log("未找到Cookie");
-      return;
+    console.log('未找到Cookie')
+    return
   }
-  return console.log(`共找到${userCount}个账号`), true;//true == !0
+  return console.log(`共找到${userCount}个账号`), true //true == !0
 }
 // DEBUG
 function debug(text, title = 'debug') {
   if ($.is_debug === 'true') {
-      if (typeof text == "string") {
-          console.log(`\n-----------${title}------------\n`);
-          console.log(text);
-          console.log(`\n-----------${title}------------\n`);
-      } else if (typeof text == "object") {
-          console.log(`\n-----------${title}------------\n`);
-          console.log($.toStr(text));
-          console.log(`\n-----------${title}------------\n`);
-      }
+    if (typeof text == 'string') {
+      console.log(`\n-----------${title}------------\n`)
+      console.log(text)
+      console.log(`\n-----------${title}------------\n`)
+    } else if (typeof text == 'object') {
+      console.log(`\n-----------${title}------------\n`)
+      console.log($.toStr(text))
+      console.log(`\n-----------${title}------------\n`)
+    }
   }
 }
 
 // 生成一个在[minLat, maxLat]范围内的随机小数，支持六位小数
 function generateRandomLatitude(minLat, maxLat) {
-  return Math.random() * (maxLat - minLat) + minLat;
+  return Math.random() * (maxLat - minLat) + minLat
 }
 
 // 生成一个在[minLon, maxLon]范围内的随机小数，支持六位小数
 function generateRandomLongitude(minLon, maxLon) {
-  return Math.random() * (maxLon - minLon) + minLon;
+  return Math.random() * (maxLon - minLon) + minLon
 }
 
 // 生成一个随机的经纬度坐标点
 function generateRandomCoordinates(lat, lon, distance) {
-  var earthRadius = 6371e3; // 地球半径，单位：米
-  var maxLatitude = lat + (distance / earthRadius) * 180 / Math.PI;
-  var minLatitude = lat - (distance / earthRadius) * 180 / Math.PI;
-  var deltaLon = (distance / earthRadius) * 360 / Math.PI;
+  var earthRadius = 6371e3 // 地球半径，单位：米
+  var maxLatitude = lat + ((distance / earthRadius) * 180) / Math.PI
+  var minLatitude = lat - ((distance / earthRadius) * 180) / Math.PI
+  var deltaLon = ((distance / earthRadius) * 360) / Math.PI
 
   // 计算经度的最小值和最大值
-  var minLon = lon - deltaLon;
-  var maxLon = lon + deltaLon;
+  var minLon = lon - deltaLon
+  var maxLon = lon + deltaLon
 
   // 处理经度的越界问题
   if (maxLon > 180) {
-    maxLon -= 360;
-    minLon -= 360;
+    maxLon -= 360
+    minLon -= 360
   } else if (minLon < -180) {
-    maxLon += 360;
-    minLon += 360;
+    maxLon += 360
+    minLon += 360
   }
 
   // 生成随机的纬度和经度
-  var randomLatitude = generateRandomLatitude(minLatitude, maxLatitude).toFixed(6);
-  var randomLongitude = generateRandomLongitude(minLon, maxLon).toFixed(6);
+  var randomLatitude = generateRandomLatitude(minLatitude, maxLatitude).toFixed(14)
+  var randomLongitude = generateRandomLongitude(minLon, maxLon).toFixed(14)
 
   return {
     latitude: Number(randomLatitude),
-    longitude: Number(randomLongitude)
-  };
+    longitude: Number(randomLongitude),
+  }
 }
 
 // 格式化时间戳为日期
 function formatTimestamp(timestampInSeconds) {
-  var date = new Date(timestampInSeconds * 1000);
-  var year = date.getUTCFullYear(); // 使用UTC函数避免时区问题
-  var month = date.getUTCMonth() + 1; // 月份是从1开始的
-  var day = date.getUTCDate();
-  var formattedDate = year + "-" + month.toString().padStart(2, '0') + "-" + day.toString().padStart(2, '0');
-  return formattedDate;
+  var date = new Date(timestampInSeconds * 1000)
+  var year = date.getUTCFullYear() // 使用UTC函数避免时区问题
+  var month = date.getUTCMonth() + 1 // 月份是从1开始的
+  var day = date.getUTCDate()
+  var formattedDate = year + '-' + month.toString().padStart(2, '0') + '-' + day.toString().padStart(2, '0')
+  return formattedDate
 }
 //随机整数生成
 function randomInt(min, max) {
-  return Math.round(Math.random() * (max - min) + min);
+  return Math.round(Math.random() * (max - min) + min)
 }
 //Bark APP notify
 async function BarkNotify(c, k, t, b) { for (let i = 0; i < 3; i++) { console.log(`🔷Bark notify >> Start push (${i + 1})`); const s = await new Promise((n) => { c.post({ url: 'https://api.day.app/push', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title: t, body: b, device_key: k, ext_params: { group: t } }) }, (e, r, d) => r && r.status == 200 ? n(1) : n(d || e)) }); if (s === 1) { console.log('✅Push success!'); break } else { console.log(`❌Push failed! >> ${s.message || s}`) } } };
