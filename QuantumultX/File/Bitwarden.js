@@ -19,6 +19,7 @@ if (!$response.body) $done({});
 let obj = JSON.parse($response.body);
 
 if (url.includes("/api/sync")) {
+  console.log(obj.profile)
   if (obj.profile?.premium!= undefined || obj.profile?.premium != null) {
     obj.profile?.premium = true;
   }
