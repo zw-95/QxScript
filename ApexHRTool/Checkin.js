@@ -250,7 +250,7 @@ class UserInfo {
       var now = new Date();
       var year = now.getUTCFullYear();
       var month = now.getUTCMonth();
-      var mthBegin = new Date(year, month, 1);
+      var mthBegin = formatTimestamp(new Date(year, month, 1).getTime()/1000);
 
       if (month === 11) {
         year += 1;
@@ -259,9 +259,9 @@ class UserInfo {
         month += 1;
       }
 
-      const mthEnd = new Date(year, month, 31)
+      const mthEnd = formatTimestamp(new Date(year, month, 31).getTime()/1000)
       const options = {
-        url: `https://${hrHost}/register/attendance/t98/query?beginDate=${formatTimestamp(mthBegin)}&endDate=${formatTimestamp(mthEnd)}&pageSize=35&pageNum=1`,
+        url: `https://${hrHost}/register/attendance/t98/query?beginDate=${mthBegin}&endDate=${mthEnd}&pageSize=35&pageNum=1`,
         //请求头, 所有接口通用
         headers: this.headers,
       }
