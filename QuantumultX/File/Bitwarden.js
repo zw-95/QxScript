@@ -3,6 +3,16 @@
 */
 // 2024年05月10日 03:58:43
 // https://vault.bitwarden.com/api/sync
+/*
+==============================
+
+[rewrite_local]
+https:\/\/vault\.bitwarden\.com\/api\/sync url script-response-body https://gitlab.com/lodepuly/vpn_tool/-/raw/master/Resource/Script/CoolApk/CoolApk_remove_ads.js
+
+[mitm]
+hostname = vault.bitwarden.com
+==============================
+*/
 
 const url = $request.url;
 if (!$response.body) $done({});
