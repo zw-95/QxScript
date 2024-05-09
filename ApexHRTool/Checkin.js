@@ -56,6 +56,18 @@ async function main() {
     var randomTimeout = user.getRandomTime();
     $.log(`随机延迟 ${randomTimeout} 秒`)
     await $.wait(randomTimeout*1000); //延迟
+
+    // 查询当月考勤情况
+    let errorSignCount = await user.getCmthErrorCount()
+    if (errorSignCount) {
+      $.log(`⚠本月考勤异常 ${errorSignCount} 天`)
+      if (errorSignCount > 0) {
+        $.Messages.push(`⚠本月考勤异常 ${errorSignCount} 天，请及时处理`)
+      }
+    } else {
+      $.log(`❌账号${user.user} >> 查询本月签到记录失败!`)
+    }
+
     //执行签到
     await user.checkLog()
     if (!user.logStat) {
@@ -80,15 +92,6 @@ async function main() {
       $.log(`❌账号${user.user} >> 签到失败!`)
     }
 
-    let errorSignCount = await user.getCmthErrorCount()
-    if (errorSignCount) {
-      $.log(`⚠本月考勤异常 ${errorSignCount} 天`)
-      if (errorSignCount > 0) {
-        $.Messages.push(`⚠本月考勤异常 ${errorSignCount} 天，请及时处理`)
-      }
-    } else {
-      $.log(`❌账号${user.user} >> 查询本月签到记录失败!`)
-    }
   }
 }
 
@@ -244,11 +247,21 @@ class UserInfo {
   async getCmthErrorCount() {
     try {
       var errorSignCount
-      var now = Math.floor(new Date() / 1000)
-      const toDay = formatTimestamp(now)
-      const nextMth = formatTimestamp(Math.floor(now + 30 * 24 * 60 * 60))
+      var now = new Date();
+      var year = now.getUTCFullYear();
+      var month = now.getUTCMonth();
+      var mthBegin = new Date(year, month, 1);
+
+      if (month === 11) {
+        year += 1;
+        month = 0;
+      } else {
+        month += 1;
+      }
+
+      const mthEnd = new Date(year, month, 31)
       const options = {
-        url: `https://${hrHost}/register/attendance/t98/query?beginDate=${toDay}&endDate=${nextMth}&pageSize=35&pageNum=1`,
+        url: `https://${hrHost}/register/attendance/t98/query?beginDate=${formatTimestamp(mthBegin)}&endDate=${formatTimestamp(mthEnd)}&pageSize=35&pageNum=1`,
         //请求头, 所有接口通用
         headers: this.headers,
       }
@@ -258,7 +271,7 @@ class UserInfo {
       var body = res
       if (body) {
         if (body.code == 1) {
-          errorSignCount = body.records.filter((v) => v.f6CN !== '正常上下班').length
+          errorSignCount = body.records.filter((v) => v.f6CN !== '正常上下班' && v.f2!=formatTimestamp(now.getTime()/1000)).length
         }
       }
       return errorSignCount
