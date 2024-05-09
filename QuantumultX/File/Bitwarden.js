@@ -7,7 +7,7 @@
 ==============================
 
 [rewrite_local]
-https:\/\/vault\.bitwarden\.com\/api\/sync url script-response-body https://gitlab.com/lodepuly/vpn_tool/-/raw/master/Resource/Script/CoolApk/CoolApk_remove_ads.js
+https:\/\/vault\.bitwarden\.com\/api\/sync url script-response-body https://raw.githubusercontent.com/zw-95/QxScript/master/QuantumultX/File/Bitwarden.js
 
 [mitm]
 hostname = vault.bitwarden.com
