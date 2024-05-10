@@ -37,8 +37,8 @@ let userIdx = 0
 let userList = []
 let userCount = 0
 const distance = 100 // 单位m
-const minTimeout = 10 // 单位s
-const maxTimeout = 120 // 单位s
+const minTimeout = 1 // 单位s
+const maxTimeout = 1 // 单位s
 let envSplitor = ['@'] //多账号分隔符
 
 $.Messages = []
@@ -59,7 +59,7 @@ async function main() {
 
     // 查询当月考勤情况
     let errorSignCount = await user.getCmthErrorCount()
-    if (errorSignCount) {
+    if (errorSignCount!=null && errorSignCount !=undefined) {
       $.log(`⚠本月考勤异常 ${errorSignCount} 天`)
       if (errorSignCount > 0) {
         $.Messages.push(`⚠本月考勤异常 ${errorSignCount} 天，请及时处理`)
