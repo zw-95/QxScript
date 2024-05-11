@@ -6,18 +6,15 @@
 如果转载，请注明出处
 
 说明：
-打开顶点HR小程序，或者已登录的刷新首页
+打开顶点HR小程序，或者已登录的刷新首页，获取到cookie即开始打卡，执行完后会清除获取到的cookie，且会返回异常打卡记录
 
-脚本将在[08:38 和 18:40, 星期一至星期五]执行，随机延迟10-120s。 您可以调整参数。
 ~~~~~~~~~~~~~~~~
 QX 1.0.10+ :
 
-[task_local]
-40 8,18 * * 1-5 https://raw.githubusercontent.com/zw-95/QxScript/master/ApexHRTool/Checkin.js, tag=顶点HR签到
-
 [rewrite_local]
 #顶点HR签到Cookie
-^https:\/\/hrtool\.apexsoft\.com\.cn\/ ^GET url-and-header script-request-header https://raw.githubusercontent.com/zw-95/QxScript/master/ApexHRTool/Checkin.js
+//^https:\/\/hrtool\.apexsoft\.com\.cn\/config ^GET url-and-header script-request-header http://192.168.10.19:5500/ApexHRTool/Checkin.js
+^https:\/\/hrtool\.apexsoft\.com\.cn\/register\/attendance\/position\/query ^GET url-and-header script-request-header https://raw.githubusercontent.com/zw-95/QxScript/master/ApexHRTool/Checkin.js
 
 [mitm]
 hostname = hrtool.apexsoft.com.cn
@@ -27,8 +24,8 @@ hostname = hrtool.apexsoft.com.cn
 const $ = new Env(`顶点HR`)
 const ckName = 'apex_hr_Cookies'
 const xAuthUserName = 'apex_hr_User'
-let userCookie = $.getdata(ckName) || ''
-let xAuthUser = $.getdata(xAuthUserName) || ''
+let userCookie = ''
+let xAuthUser = ''
 const hrHost = 'hrtool.apexsoft.com.cn'
 const tencentMapHost = 'apis.map.qq.com'
 const tencentMapApiKey = 'QDLBZ-VVF6S-NIKO3-6LVNV-CQHVS-3HFEQ' // 暂时不知道从哪取的
@@ -37,12 +34,11 @@ let userIdx = 0
 let userList = []
 let userCount = 0
 const distance = 100 // 单位m
-const minTimeout = 1 // 单位s
-const maxTimeout = 1 // 单位s
+const minTimeout = 3 // 单位s
+const maxTimeout = 3 // 单位s
 let envSplitor = ['@'] //多账号分隔符
 
 $.Messages = []
-$.msgBody = ''
 //调试
 $.is_debug = 'false'
 //是否真实打卡
@@ -88,6 +84,10 @@ async function main() {
     let signInRecord = await user.signIn()
     if (signInRecord) {
       $.Messages.push(`${signInRecord.code > 0 ? '✅' : '❌'}${signInRecord.note}`)
+      if(signInRecord.code > 0){
+        $.Messages.push(`签到公司:${user.getSignCorpName()}，`)
+        $.Messages.push(`签到地点:${user.getPosiName()}，`)
+      }
     } else {
       $.log(`❌账号${user.user} >> 签到失败!`)
     }
@@ -114,6 +114,12 @@ class UserInfo {
       'x-auth-user': this.user,
       // 'Content-Type': 'application/json'
     }
+  }
+  getSignCorpName(){
+    return this.signCorpName;
+  }
+  getPosiName(){
+    return this.posiName;
   }
   getRandomTime() {
     return randomInt(minTimeout, maxTimeout)
@@ -271,7 +277,11 @@ class UserInfo {
       var body = res
       if (body) {
         if (body.code == 1) {
-          errorSignCount = body.records.filter((v) => v.f6CN !== '正常上下班' && v.f2!=formatTimestamp(now.getTime()/1000)).length
+          var errorSignInRecords = body.records.filter((v) => v.f6CN !== '正常上下班' && v.f2!=formatTimestamp(now.getTime()/1000))
+          if(errorSignInRecords.length>0){
+            $.Messages.push(errorSignInRecords.map(v=>v.f2 + v.f8).join('\n'))
+          }
+          errorSignCount = errorSignInRecords.length
         }
       }
       return errorSignCount
@@ -332,26 +342,26 @@ class UserInfo {
 //获取Cookie
 async function getCookie() {
   if ($request && $request.method != 'OPTIONS') {
-    const tokenValue = $request.headers['Cookie'] || $request.headers['cookie']
+    userCookie = $request.headers['Cookie'] || $request.headers['cookie']
     xAuthUser = $request.headers['x-auth-user'] || $request.headers['x-Auth-User']
-    if (tokenValue && xAuthUser) {
-      $.setdata(tokenValue, ckName)
-      $.setdata(xAuthUser, xAuthUserName)
-      $.msg($.name, '', `获取顶点HR Cookie[${tokenValue}], x-Auth-User[${xAuthUser}] 成功🎉`)
+    if (userCookie && xAuthUser) {
+      $.Messages.push(`获取 Cookie 成功`)
+      return true
     } else {
-      $.msg($.name, '', '错误获取顶点HR Cookie失败')
+      $.Messages.push('获取 Cookie失败 ❌')
+      return false
     }
   }
 }
 
 //主程序执行入口
 !(async () => {
+  var hasCookie = false;
   //没有设置变量,执行Cookie获取
-  if (typeof $request != 'undefined') {
-    await getCookie()
-    return
+  if (typeof $request != 'undefined' && (userCookie === undefined || userCookie === '')) {
+    hasCookie = await getCookie()
   }
-  //未检测到ck，退出
+  //未检测到ck，退出 
   if (!(await checkEnv())) {
     throw new Error(`❌未检测到Cookie`)
   }
@@ -380,6 +390,9 @@ async function getCookie() {
       }
       await $.msg($.name, ``, $.Messages.join('\n')) //带上总结推送通知
     }
+    // 由于会话过短，每次使用后清除
+    $.setdata('', ckName)
+    $.setdata('', xAuthUserName)
     $.done() //调用Surge、QX内部特有的函数, 用于退出脚本执行
   })
 
