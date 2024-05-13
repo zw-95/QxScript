@@ -14,7 +14,7 @@
 QuantumultX:
 
 [rewrite_local]
-^https?:\/\/iios\.songshuyouxi\.com url script-request-header https://raw.githubusercontent.com/zw-95/QxScript/master/QuantumultX/File/sxios.js
+^https?:\/\/iios\.songshuyouxi\.com url script-request-header https://raw.githubusercontent.com/zw-95/QxScript/master/SongshuIOS/MyScripts/checkin.js
 
 [mitm]
 hostname = iios.songshuyouxi.com

@@ -5,23 +5,31 @@
 ==============================
 
 [rewrite_local]
-// ^https:\/\/tiebac\.baidu\.com\/* url script-response-body https://raw.githubusercontent.com/zw-95/QxScript/master/BaiduTieba/removeAd.js
-// ^https:\/\/pim\.baidu\.com\/rest\/3\.0\/im\/get_user_info url script-response-body https://raw.githubusercontent.com/zw-95/QxScript/master/BaiduTieba/removeAd.js
-// ^http(s:\/\/tiebac|:\/\/c\.tieba)\.baidu\.com\/(c\/f\/(frs\/(page|threadlist|generalTabList)|pb\/page|excellent\/personalized)$|tiebaads\/commonbatch|c\/s\/sync$) url script-response-body https://raw.githubusercontent.com/app2smile/rules/master/js/tieba-json.js
+^https:\/\/tiebac\.baidu\.com\/c\/f\/chat\/commonChannel\/* url script-response-body https://raw.githubusercontent.com/zw-95/QxScript/master/MyScripts/BaiduTieba/removeAd.js
+^https:\/\/tiebac\.baidu\.com\/c\/f\/forum\/getRecommendForumData\/* url script-response-body https://raw.githubusercontent.com/zw-95/QxScript/master/MyScripts/BaiduTieba/removeAd.js
+^https:\/\/tiebac\.baidu\.com\/c\/f\/frs\/frsBottom\/* url script-response-body https://raw.githubusercontent.com/zw-95/QxScript/master/MyScripts/BaiduTieba/removeAd.js
+^https:\/\/tiebac\.baidu\.com\/c\/f\/search\/discover\/* url script-response-body https://raw.githubusercontent.com/zw-95/QxScript/master/MyScripts/BaiduTieba/removeAd.js
+^https:\/\/tiebac\.baidu\.com\/c\/f\/sidebar\/home\/* url script-response-body https://raw.githubusercontent.com/zw-95/QxScript/master/MyScripts/BaiduTieba/removeAd.js
+^https:\/\/tiebac\.baidu\.com\/c\/u\/chat\/getChatSubscriptionList\/* url script-response-body https://raw.githubusercontent.com/zw-95/QxScript/master/MyScripts/BaiduTieba/removeAd.js
+^https:\/\/tiebac\.baidu\.com\/c\/u\/user\/profile\/* url script-response-body https://raw.githubusercontent.com/zw-95/QxScript/master/MyScripts/BaiduTieba/removeAd.js
+^https:\/\/tiebac\.baidu\.com\/playserver\/ctlconf\/* url script-response-body https://raw.githubusercontent.com/zw-95/QxScript/master/MyScripts/BaiduTieba/removeAd.js
+^http(s:\/\/tiebac|:\/\/c\.tieba)\.baidu\.com\/(c\/f\/(frs\/(page|threadlist|generalTabList)|pb\/page|excellent\/personalized)$|tiebaads\/commonbatch|c\/s\/sync$) url script-response-body https://raw.githubusercontent.com/zw-95/QxScript/master/MyScripts/BaiduTieba/removeAd.js
+^http(s:\/\/tiebac|:\/\/c\.tieba)\.baidu\.com\/c\/f\/(frs\/(page|threadlist|generalTabList)|pb\/page|excellent\/personalized)\?cmd url script-response-body https://raw.githubusercontent.com/zw-95/QxScript/master/MyScripts/BaiduTieba/removeAd.js
 
-^https:\/\/tiebac\.baidu\.com\/c\/f\/chat\/commonChannel\/* url script-response-body http://192.168.10.19:5500/BaiduTieba/removeAd.js
-^https:\/\/tiebac\.baidu\.com\/c\/f\/forum\/getRecommendForumData\/* url script-response-body http://192.168.10.19:5500/BaiduTieba/removeAd.js
-^https:\/\/tiebac\.baidu\.com\/c\/f\/frs\/frsBottom\/* url script-response-body http://192.168.10.19:5500/BaiduTieba/removeAd.js
-^https:\/\/tiebac\.baidu\.com\/c\/f\/search\/discover\/* url script-response-body http://192.168.10.19:5500/BaiduTieba/removeAd.js
-^https:\/\/tiebac\.baidu\.com\/c\/f\/sidebar\/home\/* url script-response-body http://192.168.10.19:5500/BaiduTieba/removeAd.js
-^https:\/\/tiebac\.baidu\.com\/c\/u\/chat\/getChatSubscriptionList\/* url script-response-body http://192.168.10.19:5500/BaiduTieba/removeAd.js
-^https:\/\/tiebac\.baidu\.com\/c\/u\/user\/profile\/* url script-response-body http://192.168.10.19:5500/BaiduTieba/removeAd.js
-^https:\/\/tiebac\.baidu\.com\/playserver\/ctlconf\/* url script-response-body http://192.168.10.19:5500/BaiduTieba/removeAd.js
-^http(s:\/\/tiebac|:\/\/c\.tieba)\.baidu\.com\/(c\/f\/(frs\/(page|threadlist|generalTabList)|pb\/page|excellent\/personalized)$|tiebaads\/commonbatch|c\/s\/sync$) url script-response-body http://192.168.10.19:5500/BaiduTieba/removeAd.js
-^http(s:\/\/tiebac|:\/\/c\.tieba)\.baidu\.com\/c\/f\/(frs\/(page|threadlist|generalTabList)|pb\/page|excellent\/personalized)\?cmd url script-response-body http://192.168.10.19:5500/BaiduTieba/removeAd.js
+// 本地调试时使用
+// ^https:\/\/tiebac\.baidu\.com\/c\/f\/chat\/commonChannel\/* url script-response-body http://192.168.10.19:5500/MyScripts/BaiduTieba/removeAd.js
+// ^https:\/\/tiebac\.baidu\.com\/c\/f\/forum\/getRecommendForumData\/* url script-response-body http://192.168.10.19:5500/MyScripts/BaiduTieba/removeAd.js
+// ^https:\/\/tiebac\.baidu\.com\/c\/f\/frs\/frsBottom\/* url script-response-body http://192.168.10.19:5500/MyScripts/BaiduTieba/removeAd.js
+// ^https:\/\/tiebac\.baidu\.com\/c\/f\/search\/discover\/* url script-response-body http://192.168.10.19:5500/MyScripts/BaiduTieba/removeAd.js
+// ^https:\/\/tiebac\.baidu\.com\/c\/f\/sidebar\/home\/* url script-response-body http://192.168.10.19:5500/MyScripts/BaiduTieba/removeAd.js
+// ^https:\/\/tiebac\.baidu\.com\/c\/u\/chat\/getChatSubscriptionList\/* url script-response-body http://192.168.10.19:5500/MyScripts/BaiduTieba/removeAd.js
+// ^https:\/\/tiebac\.baidu\.com\/c\/u\/user\/profile\/* url script-response-body http://192.168.10.19:5500/MyScripts/BaiduTieba/removeAd.js
+// ^https:\/\/tiebac\.baidu\.com\/playserver\/ctlconf\/* url script-response-body http://192.168.10.19:5500/MyScripts/BaiduTieba/removeAd.js
+// ^http(s:\/\/tiebac|:\/\/c\.tieba)\.baidu\.com\/(c\/f\/(frs\/(page|threadlist|generalTabList)|pb\/page|excellent\/personalized)$|tiebaads\/commonbatch|c\/s\/sync$) url script-response-body http://192.168.10.19:5500/MyScripts/BaiduTieba/removeAd.js
+// ^http(s:\/\/tiebac|:\/\/c\.tieba)\.baidu\.com\/c\/f\/(frs\/(page|threadlist|generalTabList)|pb\/page|excellent\/personalized)\?cmd url script-response-body http://192.168.10.19:5500/MyScripts/BaiduTieba/removeAd.js
 
 [mitm]
-hostname = tiebac.baidu.com, pim.baidu.com, tieba.baidu.com
+hostname = tiebac.baidu.com, tieba.baidu.com
 
 # 贴吧屏蔽域名dns查询
 IP-CIDR,180.76.76.200/32,REJECT

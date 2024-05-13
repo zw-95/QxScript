@@ -3,7 +3,6 @@
 
 脚本兼容：QuantumultX
 更新日期：2024-05-04
-如果转载，请注明出处
 
 说明：
 打开顶点HR小程序，或者已登录的刷新首页，获取到cookie即开始打卡，执行完后会清除获取到的cookie，且会返回异常打卡记录
@@ -13,8 +12,9 @@ QX 1.0.10+ :
 
 [rewrite_local]
 #顶点HR签到Cookie
-//^https:\/\/hrtool\.apexsoft\.com\.cn\/config ^GET url-and-header script-request-header http://192.168.10.19:5500/ApexHRTool/Checkin.js
-^https:\/\/hrtool\.apexsoft\.com\.cn\/register\/attendance\/position\/query ^GET url-and-header script-request-header https://raw.githubusercontent.com/zw-95/QxScript/master/ApexHRTool/Checkin.js
+//^https:\/\/hrtool\.apexsoft\.com\.cn\/config ^GET url-and-header script-request-header http://192.168.10.19:5500/MyScripts/ApexHRTool/checkin.js
+
+^https:\/\/hrtool\.apexsoft\.com\.cn\/config ^GET url-and-header script-request-header https://raw.githubusercontent.com/zw-95/QxScript/master/MyScripts/ApexHRTool/checkin.js
 
 [mitm]
 hostname = hrtool.apexsoft.com.cn
@@ -28,7 +28,7 @@ let userCookie = ''
 let xAuthUser = ''
 const hrHost = 'hrtool.apexsoft.com.cn'
 const tencentMapHost = 'apis.map.qq.com'
-const tencentMapApiKey = 'QDLBZ-VVF6S-NIKO3-6LVNV-CQHVS-3HFEQ' // 暂时不知道从哪取的
+const tencentMapParam = 'VVVSTVFsb3RWbFpHTmxNdFRrbExUek10Tmt4V1RsWXRRMUZJVmxNdE0waEdSVkU9' // 暂时不知道从哪取的
 const barkKey = '' //Bark APP 通知推送Key
 let userIdx = 0
 let userList = []
@@ -202,7 +202,7 @@ class UserInfo {
             return
           }
           const getPosiNameOptions = {
-            url: `https://${tencentMapHost}/ws/geocoder/v1/?location=${this.signRandomPosiLat},${this.signRandomPosiLon}&key=${tencentMapApiKey}`,
+            url: `https://${tencentMapHost}/ws/geocoder/v1/?location=${this.signRandomPosiLat},${this.signRandomPosiLon}&key=${atob(atob(tencentMapParam))}`,
             //请求头, 所有接口通用
             headers: this.headers,
           }
