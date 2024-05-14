@@ -358,7 +358,7 @@ async function getCookie() {
 !(async () => {
   var hasCookie = false;
   //没有设置变量,执行Cookie获取
-  if (typeof $request != 'undefined' && (userCookie === undefined || userCookie === '')) {
+  if (typeof $request != 'undefined' && !!$response.body && (userCookie === undefined || userCookie === '')) {
     hasCookie = await getCookie()
   }
   //未检测到ck，退出 
