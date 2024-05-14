@@ -1,0 +1,7 @@
+HOST-KEYWORD, umeng.com, REJECT
+HOST, qzs.gdtimg.com, REJECT
+HOST, googleads.g.doubleclick.net, REJECT
+HOST, pagead2.googleadservices.com, REJECT
+HOST, csi.gstatic.com, REJECT
+HOST, s0.2mdn.net, REJECT
+HOST, lh3.googleadsserving.cn, REJECT
