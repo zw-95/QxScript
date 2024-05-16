@@ -37,9 +37,9 @@ if (url.includes("/x/resource/show/skin")) {
 } else if (url.includes("/x/resource/top/activity")) {
   // 首页右上角活动
   obj = { code: -404, message: "啥都木有", ttl: 1, data: null };
-} else if (url.includes("/x/v2/account/mine?")) {/*
+} else if (url.includes("/x/v2/account/mine?")) {
   // 我的页面
-  const del = ["rework_v1", "vip_section", "vip_section_v2"];
+  const del = ["rework_v1", "vip_section", "vip_section_v2","mall_home"];
   for (let i of del) {
     // 不必要项目
     delete obj.data[i];
@@ -53,22 +53,29 @@ if (url.includes("/x/resource/show/skin")) {
       if (item?.style) {
         if (item?.style === 1 || item?.style === 2) {
           if (item?.title) {
-            if (item?.title === "创作中心" || item?.title === "推荐服务") {
+            if (item?.title === "创作中心") {
               // 创作中心 推荐服务
               continue;
+            } else if (item?.title === "推荐服务") {
+              delete item.title;
+              if (item?.items?.length > 0) {
+                let deleteNames = ["看视频免流量","必火推广"]
+                let newItems = [];
+                for (let i of item.items) {
+                  if (!deleteNames.includes(i.title)) {
+                    newItems.push(i);
+                  }
+                }
+                item.items = newItems;
+              }
             } else if (item?.title === "更多服务") {
               delete item.title;
               if (item?.items?.length > 0) {
+                let deleteNames = ["青少年守护"]
                 let newItems = [];
                 for (let i of item.items) {
-                  if (/user_center\/feedback/g.test(i?.uri)) {
-                    // 联系客服
+                  if (!deleteNames.includes(i.title)) {
                     newItems.push(i);
-                  } else if (/user_center\/setting/g.test(i?.uri)) {
-                    // 设置
-                    newItems.push(i);
-                  } else {
-                    continue;
                   }
                 }
                 item.items = newItems;
@@ -82,7 +89,7 @@ if (url.includes("/x/resource/show/skin")) {
       }
       newSects.push(item);
     }
-    obj.data.sections_v2 = newSects;*/
+    obj.data.sections_v2 = newSects;
   }
   // 非会员开启本地会员标识
   if (obj?.data?.vip) {
@@ -180,6 +187,13 @@ if (url.includes("/x/resource/show/skin")) {
         i.end_time = 3818419199; // Unix 时间戳 2090-12-31 23:59:59
       }
     }
+    /*
+    if (obj?.data?.show?.length > 0) {
+      for (let i of obj.data.show) {
+        i.stime = 3818332800; // Unix 时间戳 2090-12-31 00:00:00
+        i.etime = 3818419199; // Unix 时间戳 2090-12-31 23:59:59
+      }
+    }*/
   }
 } else if (url.includes("/pgc/page/bangumi") || url.includes("/pgc/page/cinema/tab")) {
   // 观影页
