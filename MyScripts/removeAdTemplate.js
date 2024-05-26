@@ -8,7 +8,7 @@
 ^https:\/\/xxx\.com\/ad url script-response-body https://raw.githubusercontent.com/zw-95/QxScript/master/MyScripts/removeAdTemplate.js
 
 // 本地调试时使用
-// ^https:\/\/xxx\.com\/ad url script-response-body url script-response-body http://192.168.10.19:5500/MyScripts/removeAdTemplate.js
+// ^https:\/\/xxx\.com\/ad url script-response-body http://192.168.10.19:5500/MyScripts/removeAdTemplate.js
 
 [mitm]
 hostname = xx.com, xxx.com
@@ -24,7 +24,7 @@ const url = $request.url;
 const $ = new Env('XXX去广告');
 if (!$response.body) $done({});
 const staticPng = 'https://s2.loli.net/2024/05/12/FVgi5EdqKtyz9Gf.png';
-let body = JSON.parse($response.body);
+let body = $.toObj($response.body);
 
 if(body){
   // 去除XXX广告
@@ -43,7 +43,7 @@ if(body){
 
 }
 
-$done({body});
+$done({ body: $.toStr(body) });
 
 //Bark APP notify
 async function BarkNotify(c, k, t, b) { for (let i = 0; i < 3; i++) { console.log(`🔷Bark notify >> Start push (${i + 1})`); const s = await new Promise((n) => { c.post({ url: 'https://api.day.app/push', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title: t, body: b, device_key: k, ext_params: { group: t } }) }, (e, r, d) => r && r.status == 200 ? n(1) : n(d || e)) }); if (s === 1) { console.log('✅Push success!'); break } else { console.log(`❌Push failed! >> ${s.message || s}`) } } };
