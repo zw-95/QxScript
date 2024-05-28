@@ -24,6 +24,7 @@ hostname = hrtool.apexsoft.com.cn
 const $ = new Env(`顶点HR`)
 const ckName = 'apex_hr_Cookies'
 const xAuthUserName = 'apex_hr_User'
+let pinPositionName = $.getdata('pinPositionName')|| '武汉顶点'
 let userCookie = ''
 let xAuthUser = ''
 const hrHost = 'hrtool.apexsoft.com.cn'
@@ -190,7 +191,7 @@ class UserInfo {
 
       var body = res
       if (body.code == 1 && body.records.length > 0) {
-        var posi = body.records.find((v) => v.note.indexOf('武汉顶点') != -1 && v.longitude && v.latitude)
+        var posi = body.records.find((v) => v.note.indexOf(pinPositionName) != -1 && v.longitude && v.latitude)
         if (posi) {
           $.log(`签到公司名：${posi.note}`)
           var randomPosi = generateRandomCoordinates(parseFloat(posi.latitude), parseFloat(posi.longitude), distance)
