@@ -18,7 +18,7 @@ hostname = vault.bitwarden.com, api.bitwarden.com
 const url = $request.url;
 if (!$response.body) $done({});
 let obj = JSON.parse($response.body);
-if (url.includes("/api/sync")) {
+if (url.includes("/sync")) {
   if (obj.profile?.premium!= undefined && obj.profile?.premium != null) {
     obj.profile.premium = true;
   }
