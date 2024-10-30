@@ -8,9 +8,10 @@
 
 [rewrite_local]
 https:\/\/vault\.bitwarden\.com\/api\/sync url script-response-body https://raw.githubusercontent.com/zw-95/QxScript/master/MyScripts/Bitwarden/unlock.js
+https:\/\/api\.bitwarden\.com\/sync url script-response-body https://raw.githubusercontent.com/zw-95/QxScript/master/MyScripts/Bitwarden/unlock.js
 
 [mitm]
-hostname = vault.bitwarden.com
+hostname = vault.bitwarden.com, api.bitwarden.com
 ==============================
 */
 
