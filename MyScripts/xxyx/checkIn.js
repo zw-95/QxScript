@@ -195,7 +195,7 @@ async function getCookie() {
 
         const newData = {
             "userId": body?.data?.nick,
-            "token": cookie,
+            "token": header["xx-token"],
             "userName": body?.data?.nick
         }
 
