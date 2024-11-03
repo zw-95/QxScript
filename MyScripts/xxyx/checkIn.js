@@ -15,7 +15,7 @@
 重写:打开软件，点击我的
 
 [rewrite_local]
-^https:\/\/xxyx-client-api\.xiaoxiaoyouxuan\.com\/my url script-response-body https://gist.githubusercontent.com/Sliverkiss/991a81be1fc8cf2a1937432be68f5521/raw/xxyx.js
+^https:\/\/xxyx-client-api\.xiaoxiaoyouxuan\.com\/my url script-response-body https://raw.githubusercontent.com/zw-95/QxScript/master/MyScripts/xxyx/checkIn.js 
 
 [MITM]
 hostname = xxyx-client-api.xiaoxiaoyouxuan.com
