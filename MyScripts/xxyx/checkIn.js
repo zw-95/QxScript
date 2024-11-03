@@ -194,9 +194,9 @@ async function getCookie() {
         if (!(header["xx-token"] && body?.data?.name)) throw new Error("获取token失败！参数缺失");
 
         const newData = {
-            "userId": body?.data?.name,
+            "userId": body?.data?.nick,
             "token": cookie,
-            "userName": body?.data?.name
+            "userName": body?.data?.nick
         }
 
         const index = userCookie.findIndex(e => e.userId == newData.userId);
