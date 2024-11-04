@@ -63,7 +63,7 @@ async function main() {
                 taskList = await user.getTaskList();
                 taskList.map(e => $.log(`${e.taskName}:${e.isCompleted == 1 ? '已完成' : '未完成'}`));
 
-                $.notifyMsg.push(`[${userInfo?.nick}] 能量:${pointE}+${pointE - pointF}`)
+                $.notifyMsg.push(`[${userInfo?.nick}] 能量:${pointE}，今日+${pointE - pointF}`)
                 $.succCount++;
             } else {
                 DoubleLog(`⛔️ 「${user.userName ?? `账号${index}`}」签到失败, 用户需要去登录`)
