@@ -773,12 +773,35 @@ try{
     
     // 去除页面无用元素
     if(obj?.data?.regions?.content?.length > 0){
-      let dispCard = ['portal_resume','CouponPortalCard','navigation_entry','operation_entry','operation_entry_without_rank']
+      let dispCard = ['hotWordsRecommend','portal_resume','CouponPortalCard','navigation_entry','operation_entry','operation_entry_without_rank']
       obj.data.regions.content = obj.data.regions.content.filter((i)=> !dispCard.includes(i));
 
       let dispWidget = ['CouponWidget'];
       obj.data.regions.widget = obj.data.regions.widget.filter((i)=> !dispWidget.includes(i));
     }
+    // 去除酒店推荐搜索词
+    if(obj?.data?.modules?.user_filter_card?.data?.sug_items_data?.data?.length > 0){
+      obj.data.modules.user_filter_card.data.sug_items_data.data = [];
+    }
+    
+    // 去除搜索卡片下方小字
+    if(obj?.data?.modules?.user_filter_card?.data?.service_data?.length > 0){
+      obj.data.modules.user_filter_card.data.service_data = [];
+    }
+    
+    // 去除酒店页面banner
+    if(obj?.data?.modules?.user_filter_card?.data?.bannerList?.length > 0){
+      obj.data.modules.user_filter_card.data.bannerList = [];
+    }
+    // 
+    if(obj?.data?.modules?.CouponPortalCard){
+      delete obj.data.modules.CouponPortalCard;
+    }
+    
+    if(obj?.data?.modules?.CouponPopup){
+      delete obj.data.modules.CouponPopup;
+    }
+    
     // 去除酒店卡片无用图标
     if(obj?.data?.modules?.hotel_list?.data?.poi_list?.length > 0){
       obj.data.modules.hotel_list.data.poi_list = obj.data.modules.hotel_list.data.poi_list.filter(item => item?.card?.data?.poi?.is_ad !== '1');
