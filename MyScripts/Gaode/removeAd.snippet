@@ -34,7 +34,7 @@ DOMAIN, free-aos-cdn-image.amap.com, REJECT
 
 # 收集信息
 ^https:\/\/m5\.amap\.com\/ws\/(shield|alc)\/highway\/collect reject-dict
-
+^https:\/\/awaken.a\map\.com\/ws\/h5_log\? reject-dict
 
 [Script]
 # 移除阿里巴巴通用广告请求
@@ -88,4 +88,4 @@ http-response ^https:\/\/m5\.amap\.com\/ws\/c3frontend\/af-hotel\/page\/main scr
 
 
 [Mitm]
-hostname = m5.amap.com, m5-zb.amap.com, oss.amap.com, sns.amap.com
+hostname = m5.amap.com, m5-zb.amap.com, oss.amap.com, sns.amap.com, awaken.amap.com
