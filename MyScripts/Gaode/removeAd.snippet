@@ -32,6 +32,10 @@ DOMAIN, free-aos-cdn-image.amap.com, REJECT
 ^https:\/\/m5-x\.amap\.com\/ws\/boss\/(car\/order\/content_info|order\/car\/king_toolbox_car_bubble)\? reject-dict
 ^https:\/\/m5-x\.amap\.com\/ws\/boss\/(order_web\/friendly_information|tips\/onscene_visual_optimization)\? reject-dict
 
+# 收集信息
+^https:\/\/m5\.amap\.com\/ws\/shield\/highway\/collect? reject-dict
+
+
 [Script]
 # 移除阿里巴巴通用广告请求
 http-response ^http:\/\/amdc\.m\.taobao\.com\/amdc\/mobileDispatch$ script-path = http://raw.githubusercontent.com/zw-95/QxScript/master/MyScripts/Gaode/Alibaba_amdc_reject.js, tag = 移除阿里巴巴通用广告请求
