@@ -154,6 +154,7 @@ class UserInfo {
       debug(res, `查询当日签到记录结果`)
       var body = res
       var hours = new Date().getHours()
+      var mins = new Date().getMinutes()
       if (body.code == 1) {
         if (hours >= 0 && hours < 12) {
           // 上午
@@ -163,7 +164,7 @@ class UserInfo {
             $.Messages.push(`上午已经签过到了！`)
             $.log(`上午已经签过到了！`)
           }
-        } else {
+        } else if(hours == 17 && mins > 30 || hours > 17){
           // 下午
           if (body.records.length == 1) {
             this.checkStat = true
@@ -171,6 +172,9 @@ class UserInfo {
             $.Messages.push(`下午已经签过到了！`)
             $.log(`下午已经签过到了！`)
           }
+        } else {
+            $.Messages.push(`还未到打卡时间${hours}:${mins}！`)
+            $.log(`还未到打卡时间${hours}:${mins}！`)
         }
       }
     } catch (e) {
