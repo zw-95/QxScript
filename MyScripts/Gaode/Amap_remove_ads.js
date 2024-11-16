@@ -711,7 +711,7 @@ try{
     }
   } else if (url.includes("/ws/shield/search_bff/portal/hkf")) {
     // 火车飞机
-    hkfScheduleRecommend
+    
     // 推荐线路
     if(obj?.data?.modules?.hkf_mini_list?.data?.searchList?.routeBlocks?.length > 0){
       obj.data.modules.hkf_mini_list.data.searchList.routeBlocks = [];
