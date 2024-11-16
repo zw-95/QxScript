@@ -729,6 +729,10 @@ try{
       let dispCard = ['hkfScheduleRecommend']
       obj.data.regions.content = obj.data.regions.content.filter((i)=> !dispCard.includes(i));
     }
+    // 去除推荐航班
+    if(obj?.data?.modules?.hkfScheduleRecommend?.data?.modules?.contentList?.items?.length > 0){
+      obj.data.modules.hkfScheduleRecommend.data.modules.contentList.items = [];
+    }
   } else if (url.includes("/ws/shield/search_bff/portal/hotel")) {
     // 酒店民宿
     
