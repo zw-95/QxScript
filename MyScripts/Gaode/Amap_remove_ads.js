@@ -733,6 +733,14 @@ try{
     if(obj?.data?.modules?.hkfScheduleRecommend?.data?.modules?.contentList?.items?.length > 0){
       obj.data.modules.hkfScheduleRecommend.data.modules.contentList.items = [];
     }
+    // 去除推荐机票卡
+    if(obj?.data?.modules?.airTicketPassRecommend?.data?.list?.length > 0){
+      obj.data.modules.airTicketPassRecommend.data.list = [];
+    }
+    // 去除查询按钮气泡
+    if(obj?.data?.modules?.hkf_route?.data?.bubble?.text){
+      obj.data.modules.hkf_route.data.bubble.text = '';
+    }
   } else if (url.includes("/ws/shield/search_bff/portal/hotel")) {
     // 酒店民宿
     
