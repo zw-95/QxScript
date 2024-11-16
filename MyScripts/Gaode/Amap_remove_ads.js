@@ -711,6 +711,7 @@ try{
     }
   } else if (url.includes("/ws/shield/search_bff/portal/hkf")) {
     // 火车飞机
+    hkfScheduleRecommend
     // 推荐线路
     if(obj?.data?.modules?.hkf_mini_list?.data?.searchList?.routeBlocks?.length > 0){
       obj.data.modules.hkf_mini_list.data.searchList.routeBlocks = [];
@@ -722,6 +723,11 @@ try{
     // 头部
     if(obj?.data?.modules?.BannerList?.data?.bannerList?.length > 0){
       obj.data.modules.BannerList.data.bannerList = [];
+    }
+    // 去除推荐航班
+    if(obj?.data?.regions?.content?.length > 0){
+      let dispCard = ['hkfScheduleRecommend']
+      obj.data.regions.content = obj.data.regions.content.filter((i)=> !dispCard.includes(i));
     }
   } else if (url.includes("/ws/shield/search_bff/portal/hotel")) {
     // 酒店民宿
