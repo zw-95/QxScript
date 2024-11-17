@@ -36,7 +36,10 @@ if(body){
   if (url.includes("/api/v3/comic/")) {
     if (body.results) {
       body.results.is_vip = true;
+      body.results.is_mobile_bind = true;
       body.results.show_app= false;
+      body.results.is_login= true;
+      body.results.chapter.is_long = true;
     }
   }
 
