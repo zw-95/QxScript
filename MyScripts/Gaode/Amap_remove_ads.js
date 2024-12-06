@@ -853,7 +853,10 @@ try{
         }
       }
     }
-    
+  } else if(url.includes("/ws/aos/perception/publicTravel/beforeNavi")){
+    if(obj?.data?.front_end?.assistant?.length > 0){
+      obj.data.front_end.assistant = [];
+    }
   }
 }catch (error) {
   console.log("An error occurred:", error);
