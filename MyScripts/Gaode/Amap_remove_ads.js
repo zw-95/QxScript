@@ -854,8 +854,14 @@ try{
       }
     }
   } else if(url.includes("/ws/aos/perception/publicTravel/beforeNavi")){
+    // 路线左上角圆形
     if(obj?.data?.front_end?.assistant?.length > 0){
       obj.data.front_end.assistant = [];
+    }
+    
+    // 地图上的赚钱小图标
+    if(obj?.data?.horus?.bubble_plan_template_datas?.length>0 && obj?.data?.horus?.bubble_plan_template_datas[0]?.params?.some(v=>v.key === 'RouteBubble_MakeMoneyTask')){
+      obj.data.horus.bubble_plan_template_datas[0].params = obj.data.horus.bubble_plan_template_datas[0].params.filter(v => v.key !== 'RouteBubble_MakeMoneyTask');
     }
   }
 }catch (error) {
