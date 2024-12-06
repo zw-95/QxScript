@@ -861,12 +861,15 @@ try{
     
     // 地图上的赚钱小图标
     var makeMoneyKey=['RouteBubble_MakeMoneyTask','RouteBubble_MakeMoneyTaskTiny'];
-    if(obj?.data?.horus?.bubble_plan_template_datas?.length>0 && obj?.data?.horus?.bubble_plan_template_datas[0]?.params?.some(v=> makeMoneyKey.includes(v.key))){
-      obj.data.horus.bubble_plan_template_datas[0].params = obj.data.horus.bubble_plan_template_datas[0].params.filter(v => !makeMoneyKey.includes(v.key));
+    if(obj?.data?.horus?.bubble_plan_template_datas?.length>0 && obj?.data?.horus?.bubble_plan_template_datas[0]?.params?.some(v=> makeMoneyKey.includes(v?.key))){
+      obj.data.horus.bubble_plan_template_datas[0].params = obj.data.horus.bubble_plan_template_datas[0].params.filter(v => !makeMoneyKey.includes(v?.key));
     }
   }
-}catch (error) {
-  console.log("An error occurred:", error);
-  throw error;
+} catch (error) {
+  console.log("An error occurred:", error.name); // 错误名称
+  console.log("Error message:", error.message); // 错误消息
+  console.log("Stack trace:", error.stack); // 调用栈信息
+  throw error; // 重新抛出错误，以便外部可以进一步处理
 }
+
 $done({ body: JSON.stringify(obj) });
