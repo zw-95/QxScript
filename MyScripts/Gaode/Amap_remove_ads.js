@@ -861,8 +861,8 @@ try{
     
     // 地图上的赚钱小图标
     var makeMoneyKey=['RouteBubble_MakeMoneyTask','RouteBubble_MakeMoneyTaskTiny'];
-    if(obj?.data?.horus?.bubble_plan_template_datas?.length>0 && obj?.data?.horus?.bubble_plan_template_datas[0]?.params?.some(v=> makeMoneyKey.contains(v.key))){
-      obj.data.horus.bubble_plan_template_datas[0].params = obj.data.horus.bubble_plan_template_datas[0].params.filter(v => ！makeMoneyKey.contains(v.key));
+    if(obj?.data?.horus?.bubble_plan_template_datas?.length>0 && obj?.data?.horus?.bubble_plan_template_datas[0]?.params?.some(v=> makeMoneyKey.includes(v.key))){
+      obj.data.horus.bubble_plan_template_datas[0].params = obj.data.horus.bubble_plan_template_datas[0].params.filter(v => ！makeMoneyKey.includes(v.key));
     }
   }
 }catch (error) {
