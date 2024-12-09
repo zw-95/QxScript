@@ -24,32 +24,7 @@ let obj = {};
 if(typeof $response == "undefined") {
   $request.headers["User-Agent"] = `Mozilla/5.0 (iPhone; CPU iPhone OS 18_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) iDOKit/1.0.0 RSSX/1.0.0`;
   obj.headers = $request.headers;
-} else {
-  var obj = $.toObj($response.body)
-  // 
-  if (url.includes("/api/v3/system/network21")) {
-    if (body.results) {
-      body.results.vip_downloads = 1;
-      body.results.ads_home_seconds = 0;
-      body.results.ads_read_express_show = 0;
-      body.results.ads_screen_show = 0;
-      body.results.in_mainland = false;
-    }
-  }
-  // 
-  if (url.includes("/api/v3/comic/")) {
-    if (body.results) {
-      body.results.is_vip = true;
-      body.results.is_mobile_bind = true;
-      body.results.show_app= false;
-      body.results.is_login= true;
-      body.results.chapter.is_long = true;
-    }
-  }
-  
-  obj.body = body
-}
-
+} 
 $done(obj);
 
 //Bark APP notify
