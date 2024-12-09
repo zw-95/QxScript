@@ -8,7 +8,7 @@
 //^https:\/\/api\.mangacopy\.com\/api\/v3\/system\/network21 url script-response-body https://raw.githubusercontent.com/zw-95/QxScript/master/MyScripts/mangacopy/removeAds.js
 //^https:\/\/api\.mangacopy\.com\/api\/v3\/comic\/ url script-response-body https://raw.githubusercontent.com/zw-95/QxScript/master/MyScripts/mangacopy/removeAds.js
 
-^https:\/\/api\.mangacopy\.com\/api\/v3\/comic2\/ url script-request-header https://raw.githubusercontent.com/zw-95/QxScript/master/MyScripts/mangacopy/removeAds.js
+^https:\/\/api\.mangacopy\.com\/api\/v3\/comic(\d)?\/ url script-request-header https://raw.githubusercontent.com/zw-95/QxScript/master/MyScripts/mangacopy/removeAds.js
 
 [mitm]
 hostname = api.mangacopy.com
