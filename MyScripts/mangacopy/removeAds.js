@@ -5,10 +5,10 @@
 ==============================
 
 [rewrite_local]
-//^https:\/\/api\.mangacopy\.com\/api\/v3\/system\/network21 url script-response-body https://raw.githubusercontent.com/zw-95/QxScript/master/MyScripts/mangacopy/removeAds.js
-//^https:\/\/api\.mangacopy\.com\/api\/v3\/comic\/ url script-response-body https://raw.githubusercontent.com/zw-95/QxScript/master/MyScripts/mangacopy/removeAds.js
-
+// 漫画基本信息
 ^https:\/\/api\.mangacopy\.com\/api\/v3\/comic(\d)?\/ url script-request-header https://raw.githubusercontent.com/zw-95/QxScript/master/MyScripts/mangacopy/removeAds.js
+// 漫画章节的漫画图片列表
+^https:\/\/api\.mangacopy\.com\/api\/v3\/comic\/.+\/chapter2\/ url script-request-header https://raw.githubusercontent.com/zw-95/QxScript/master/MyScripts/mangacopy/removeAds.js
 
 [mitm]
 hostname = api.mangacopy.com
@@ -22,7 +22,12 @@ const staticPng = 'https://s2.loli.net/2024/05/12/FVgi5EdqKtyz9Gf.png';
 let obj = {};
 
 if(typeof $response == "undefined") {
-  $request.headers["User-Agent"] = `Mozilla/5.0 (iPhone; CPU iPhone OS 18_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) iDOKit/1.0.0 RSSX/1.0.0`;
+    if(/^https:\/\/api\.mangacopy\.com\/api\/v3\/comic(\d)?\//.test(url)){
+      $request.headers["User-Agent"] = `Mozilla/5.0 (iPhone; CPU iPhone OS 18_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) iDOKit/1.0.0 RSSX/1.0.0`;
+    }else if(/^https:\/\/api\.mangacopy\.com\/api\/v3\/comic\/.+\/chapter2\//.test(url)){
+        $request.headers["User-Agent"] = `duoTuoCartoon/3.2.4 (iPhone; iOS 18.1; Scale/3.00) iDOKit/1.0.0 RSSX/1.0.0`;
+    }
+  
   obj.headers = $request.headers;
 } 
 $done(obj);
