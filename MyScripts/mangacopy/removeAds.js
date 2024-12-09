@@ -13,8 +13,11 @@
 // 漫画章节的漫画图片列表
 ^https:\/\/api\.mangacopy\.com\/api\/v3\/comic\/(.+)\/chapter2\/ url script-request-header https://raw.githubusercontent.com/zw-95/QxScript/master/MyScripts/mangacopy/removeAds.js
 
+// 桌面版漫画基本信息
+^https:\/\/www\.mangacopy\.com\/comic\/.+$ url script-request-header https://raw.githubusercontent.com/zw-95/QxScript/master/MyScripts/mangacopy/removeAds.js
+
 [mitm]
-hostname = api.mangacopy.com
+hostname = api.mangacopy.com, www.mangacopy.com
 
 ==============================
 */
@@ -27,7 +30,7 @@ let obj = {};
 if(typeof $response == "undefined") {
     if(/^https:\/\/api\.mangacopy\.com\/api\/v3\/comic\/.+\/chapter2\//.test(url)){
         $request.headers["User-Agent"] = `duoTuoCartoon/3.2.4 (iPhone; iOS 18.1; Scale/3.00) iDOKit/1.0.0 RSSX/1.0.0`;
-    } else if(/^https:\/\/api\.mangacopy\.com\/api\/v3\/comic\/.+\/group\/default\/chapters/.test(url) || /^https:\/\/api\.mangacopy\.com\/api\/v3\/comic2\/.+\?/.test(url)){
+    } else if(/^https:\/\/api\.mangacopy\.com\/api\/v3\/comic\/.+\/group\/default\/chapters/.test(url) || /^https:\/\/api\.mangacopy\.com\/api\/v3\/comic2\/.+\?/.test(url) || /^https:\/\/www\.mangacopy\.com\/comic\/.+$/.test(url)){
       $request.headers["User-Agent"] = `Mozilla/5.0 (iPhone; CPU iPhone OS 18_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) iDOKit/1.0.0 RSSX/1.0.0`;
     }
   
