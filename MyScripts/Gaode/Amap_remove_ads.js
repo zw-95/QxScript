@@ -715,6 +715,7 @@ try{
     }
   } else if (url.includes("/ws/shield/search_bff/portal/hkf")) {
     // 火车飞机
+    
     // 推荐线路
     if(obj?.data?.modules?.hkf_mini_list?.data?.searchList?.routeBlocks?.length > 0){
       obj.data.modules.hkf_mini_list.data.searchList.routeBlocks = [];
@@ -726,6 +727,23 @@ try{
     // 头部
     if(obj?.data?.modules?.BannerList?.data?.bannerList?.length > 0){
       obj.data.modules.BannerList.data.bannerList = [];
+    }
+    // 去除推荐航班
+    if(obj?.data?.regions?.content?.length > 0){
+      let dispCard = ['hkfScheduleRecommend']
+      obj.data.regions.content = obj.data.regions.content.filter((i)=> !dispCard.includes(i));
+    }
+    // 去除推荐航班
+    if(obj?.data?.modules?.hkfScheduleRecommend?.data?.modules?.contentList?.items?.length > 0){
+      obj.data.modules.hkfScheduleRecommend.data.modules.contentList.items = [];
+    }
+    // 去除推荐机票卡
+    if(obj?.data?.modules?.airTicketPassRecommend?.data?.list?.length > 0){
+      obj.data.modules.airTicketPassRecommend.data.list = [];
+    }
+    // 去除查询按钮气泡
+    if(obj?.data?.modules?.hkf_route?.data?.bubble?.text){
+      obj.data.modules.hkf_route.data.bubble.text = '';
     }
   } else if (url.includes("/ws/shield/search_bff/portal/hotel")) {
     // 酒店民宿
@@ -839,10 +857,23 @@ try{
         }
       }
     }
+  } else if(url.includes("/ws/aos/perception/publicTravel/beforeNavi")){
+    // 路线左上角圆形
+    if(obj?.data?.front_end?.assistant?.length > 0){
+      obj.data.front_end.assistant = [];
+    }
     
+    // 地图上的赚钱小图标
+    var makeMoneyKey=['RouteBubble_MakeMoneyTask','RouteBubble_MakeMoneyTaskTiny'];
+    if(obj?.data?.horus?.bubble_plan_template_datas?.length>0 && obj?.data?.horus?.bubble_plan_template_datas[0]?.params?.some(v=> makeMoneyKey.includes(v?.key))){
+      obj.data.horus.bubble_plan_template_datas[0].params = obj.data.horus.bubble_plan_template_datas[0].params.filter(v => !makeMoneyKey.includes(v?.key));
+    }
   }
-}catch (error) {
-  console.log("An error occurred:", error);
-  throw error;
+} catch (error) {
+  console.log("An error occurred:", error.name); // 错误名称
+  console.log("Error message:", error.message); // 错误消息
+  console.log("Stack trace:", error.stack); // 调用栈信息
+  throw error; // 重新抛出错误，以便外部可以进一步处理
 }
+
 $done({ body: JSON.stringify(obj) });

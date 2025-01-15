@@ -81,11 +81,12 @@ http-response ^https:\/\/m5\.amap\.com\/ws\/shield\/search\/scenic_portal script
 # 火车飞机
 http-response ^https:\/\/m5\.amap\.com\/ws\/shield\/search_bff\/portal\/hkf script-path = http://raw.githubusercontent.com/zw-95/QxScript/master/MyScripts/Gaode/Amap_remove_ads.js, requires-body = true, tag = 移除火车飞机广告
 
-
 # 酒店民宿
 http-response ^https:\/\/m5\.amap\.com\/ws\/shield\/search_bff\/portal\/hotel script-path = http://raw.githubusercontent.com/zw-95/QxScript/master/MyScripts/Gaode/Amap_remove_ads.js, requires-body = true, tag = 移除酒店民宿广告
 http-response ^https:\/\/m5\.amap\.com\/ws\/c3frontend\/af-hotel\/page\/main script-path = http://raw.githubusercontent.com/zw-95/QxScript/master/MyScripts/Gaode/Amap_remove_ads.js, requires-body = true, tag = 移除酒店民宿广告
 
+# 路线页面左上角
+http-response ^https:\/\/m5\.amap\.com\/ws\/aos\/perception\/publicTravel\/beforeNavi script-path = http://raw.githubusercontent.com/zw-95/QxScript/master/MyScripts/Gaode/Amap_remove_ads.js, requires-body = true, tag = 去除路线左上角图标
 
 [Mitm]
 hostname = m5.amap.com, m5-zb.amap.com, oss.amap.com, sns.amap.com, awaken.amap.com
