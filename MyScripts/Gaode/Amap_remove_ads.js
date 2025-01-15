@@ -868,6 +868,52 @@ try{
     if(obj?.data?.horus?.bubble_plan_template_datas?.length>0 && obj?.data?.horus?.bubble_plan_template_datas[0]?.params?.some(v=> makeMoneyKey.includes(v?.key))){
       obj.data.horus.bubble_plan_template_datas[0].params = obj.data.horus.bubble_plan_template_datas[0].params.filter(v => !makeMoneyKey.includes(v?.key));
     }
+  } else if(url.includes("/ws/shield/search_business/process/query/poi/info")){
+    // 收藏夹-酒店收藏
+    if(obj?.data?.poi_list?.length > 0){
+      for (let item of obj.data.poi_list) {
+        // 几分钟前有人想去文字，改为评价数、收藏数
+        if(item?.hotInfo){
+          var orderCnt = item.hotInfo?.orderCnt || 0; // 总销量
+          var orderCnt6mon = item.hotInfo?.orderCnt6mon || 0; // 近半年销量
+          var favoriteNum = item.hotInfo?.favoriteNum || 0; // 收藏人数
+          var reviewCount = item.evaluation?.reviewCount || 0; // 评价人数
+          item.hotInfo.urgencyList = []
+          item.hotInfo.urgencyInfo = `${reviewCount}评价，${favoriteNum}收藏`
+
+          // 大家都在说 改为销量
+          if(item?.recReason){
+            item.recReason.userProfiles = []
+            item.recReason.content = `近半年销量${orderCnt6mon},总销量${orderCnt}`
+          }
+        }
+        
+        // 去除活动标签
+        if(item?.tags){
+          item.tags = item.tags.filter(v => v?.type !== 'activity' && v?.type !== 'deal');
+        }
+        // 去除活动标签
+        if(item?.activityInfo){
+          item.activityInfo = {}
+        }
+        // 简化价格标签
+        if(item?.priceInfo){
+          delete item.priceInfo.priceOff
+          delete item.priceInfo.discountRate
+          delete item.priceInfo.totalDiscountAmount
+          delete item.priceInfo.selfDiscountInfos
+          delete item.priceInfo.tags
+          delete item.priceInfo.activeInfo
+          delete item.priceInfo.mallDetailDTO.priceOff
+          delete item.priceInfo.mallDetailDTO.discountRate
+          delete item.priceInfo.mallDetailDTO.activeInfo
+          item.priceInfo.priceOri = item.priceInfo.priceSale
+          item.priceInfo.mallDetailDTO.priceOri = item.priceInfo.mallDetailDTO.priceSale
+          
+        }
+      }
+    }
+    
   }
 } catch (error) {
   console.log("An error occurred:", error.name); // 错误名称

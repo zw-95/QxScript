@@ -88,5 +88,8 @@ http-response ^https:\/\/m5\.amap\.com\/ws\/c3frontend\/af-hotel\/page\/main scr
 # 路线页面左上角
 http-response ^https:\/\/m5\.amap\.com\/ws\/aos\/perception\/publicTravel\/beforeNavi script-path = http://raw.githubusercontent.com/zw-95/QxScript/master/MyScripts/Gaode/Amap_remove_ads.js, requires-body = true, tag = 去除路线左上角图标
 
+# 车主页面
+http-response ^https:\/\/m5\.amap\.com\/ws\/shield\/search_business\/process\/query\/poi\/info script-path = http://raw.githubusercontent.com/zw-95/QxScript/master/MyScripts/Gaode/Amap_remove_ads.js, requires-body = true, tag = 移除车主页面广告
+
 [Mitm]
 hostname = m5.amap.com, m5-zb.amap.com, oss.amap.com, sns.amap.com, awaken.amap.com
