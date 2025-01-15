@@ -430,7 +430,11 @@ try{
       // "video",
       "waistRecEntrance", // 更多人气好去处
       "waterFallFeed", // 附近景点瀑布流
-      "waterFallFeedTitle" // 更多好去处
+      "waterFallFeedTitle", // 更多好去处标题
+      "poiDetailWaterFeed", // 更多好去处
+      "poiDetailWaterFeedTitle", // 地址详情最下面更多好去处标题
+      "platformCustomerCommonModule", // 医疗添加的模块【可能需要的其他医疗服务】
+      "platformCustomerComplianceInfo", // 本服务由高德精选商家提供 提示文字
     ];
     if (obj?.data?.modules) {
       for (let i of items) {
