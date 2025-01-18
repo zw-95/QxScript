@@ -435,6 +435,13 @@ try{
       "poiDetailWaterFeedTitle", // 地址详情最下面更多好去处标题
       "platformCustomerCommonModule", // 医疗添加的模块【可能需要的其他医疗服务】
       "platformCustomerComplianceInfo", // 本服务由高德精选商家提供 提示文字
+      "similarShopRecommend", // 同类店铺推荐
+      "yellowPageAdRecommendModule", // 好物推荐
+      "similarShelfRecommend", // 附近相似好店
+      "poiDetailNewBeltV2", // 景点标头高德红包行
+      "rentSaleHouse", // 小区买房卖房，出租租房电话行
+      "cpt_service_simple", // 出租租房在线问行
+      "detail_bottom_shop_service", // 出租租房在线底部固定行
     ];
     if (obj?.data?.modules) {
       for (let i of items) {
