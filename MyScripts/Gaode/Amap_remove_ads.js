@@ -446,7 +446,7 @@ try{
       "rentSaleHouse", // 小区买房卖房，出租租房电话行
       "cpt_service_simple", // 出租租房在线问行
       "detail_bottom_shop_service", // 出租租房在线底部固定行
-      "HkfCalendarRecommend", // 春节火车票优惠订
+      "hkfCalendarRecommend", // 春节火车票优惠订
       // "hkfMiniPortal", // 订火车票 订票页面 飞机 火车 汽车
       "hkfTicketShelf", // 火车站详情页，自动查询的火车票列表，太占地儿了
     ];
