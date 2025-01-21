@@ -725,6 +725,13 @@ try{
         return item.productInfo.description.includes('需登录');
       });
     }
+  } else if (url.includes("/ws/shield/search_business/process/fill_order")) {
+    // 订票详情页
+    // 下面保险购买
+    if(obj?.data?.productTying?.data?.complexProduct?.length > 0){
+      obj.data.productTying = {}
+      // obj.data.productTying.data.complexProduct = []
+    }
   } else if (url.includes("/ws/shield/search/scenic_portal")) {
     // 景区门票
     // 头部

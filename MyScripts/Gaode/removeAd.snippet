@@ -84,6 +84,7 @@ http-response ^https:\/\/m5\.amap\.com\/ws\/shield\/search_bff\/portal\/hkf scri
 
 # 车站订票页面
 http-response ^https:\/\/m5\.amap\.com\/ws\/shield\/search_business\/process\/product_detail script-path = http://raw.githubusercontent.com/zw-95/QxScript/master/MyScripts/Gaode/Amap_remove_ads.js, requires-body = true, tag = 移除火车广告
+http-response ^https:\/\/m5\.amap\.com\/ws\/shield\/search_business\/process\/fill_order script-path = http://raw.githubusercontent.com/zw-95/QxScript/master/MyScripts/Gaode/Amap_remove_ads.js, requires-body = true, tag = 移除下车票订单页面的广告
 
 # 酒店民宿
 http-response ^https:\/\/m5\.amap\.com\/ws\/shield\/search_bff\/portal\/hotel script-path = http://raw.githubusercontent.com/zw-95/QxScript/master/MyScripts/Gaode/Amap_remove_ads.js, requires-body = true, tag = 移除酒店民宿广告
