@@ -21,7 +21,12 @@ try{
         delete obj.data["105"][i];
       }
     }
-  } else if (url.includes("/faas/amap-navigation/card-service-plan-home")) {
+  } else if (url.includes("/boss/order/car/feedback/get_card_questions")) {
+    // 订单反馈页面
+    if (obj?.data?.questionInfo?.length>0) {
+      obj.data.questionInfo = []
+    }
+  }else if (url.includes("/faas/amap-navigation/card-service-plan-home")) {
     // 路线规划页
     if (obj?.data?.children?.length > 0) {
       // 有schema参数的为推广
