@@ -715,6 +715,14 @@ try{
     // 商品列表
     obj.data.operation.data.activity = {};
     obj.data.resourcePlacement.data.materialList = [];
+  } else if (url.includes("/ws/shield/search_business/process/product_detail")) {
+    // 订票详情页
+    // 顶部按钮
+    if(obj?.data?.structShelf?.data[0]?.shelf?.list[0]?.list[0].list.length > 0 && obj?.data?.structShelf?.data[0]?.shelfType == 'trainSecPage'){
+      obj.data.structShelf.data[0].shelf?.list[0]?.list[0].list = obj.data.structShelf.data[0].shelf?.list[0]?.list[0].list.filter(item=>{
+        return !item.productInfo.description.includes('需登录');
+      });
+    }
   } else if (url.includes("/ws/shield/search/scenic_portal")) {
     // 景区门票
     // 头部
