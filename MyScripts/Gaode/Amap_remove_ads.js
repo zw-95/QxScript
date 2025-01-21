@@ -319,7 +319,6 @@ try{
       // "foreclosurehouse",
       // "gallery_info", // 现场照片
       // "ggc_entry",
-      // "hkfMiniPortal", // 订票页面 飞机 火车 汽车
       "horizontalGoodsShelf",
       "hotPlay", // 热门玩法
       "hot_new_house_estate",
@@ -447,6 +446,9 @@ try{
       "rentSaleHouse", // 小区买房卖房，出租租房电话行
       "cpt_service_simple", // 出租租房在线问行
       "detail_bottom_shop_service", // 出租租房在线底部固定行
+      "HkfCalendarRecommend", // 春节火车票优惠订
+      // "hkfMiniPortal", // 订火车票 订票页面 飞机 火车 汽车
+      "hkfTicketShelf", // 火车站详情页，自动查询的火车票列表，太占地儿了
     ];
     if (obj?.data?.modules) {
       for (let i of items) {
