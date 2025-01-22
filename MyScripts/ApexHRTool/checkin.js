@@ -204,7 +204,7 @@ class UserInfo {
       var hours = new Date().getHours()
       var mins = new Date().getMinutes()
       if (body.code == 1) {
-        if (checkCurrentTime(body.worktimeBegin, body.worktimeEnd) == -1) {
+        if (checkCurrentTime(this.worktimeBegin, this.worktimeEnd) == -1) {
           // 上午
           if (body.records.length == 0) {
             // 上午校验时，需要没有签到过
@@ -213,7 +213,7 @@ class UserInfo {
             $.Messages.push(`上午已经签过到了！`)
             $.log(`上午已经签过到了！`)
           }
-        } else if (checkCurrentTime(body.worktimeBegin, body.worktimeEnd) == 1) {
+        } else if (checkCurrentTime(this.worktimeBegin, this.worktimeEnd) == 1) {
           // 下午下班之后
           if (body.records.length == 1) {
             // 下午校验时，需要仅早上签到过一次
