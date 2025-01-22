@@ -419,8 +419,8 @@ async function getCookie() {
 //主程序执行入口
 !(async () => {
   var hasCookie = false
-  if (typeof $request != 'undefined' && (userCookie === undefined || userCookie === '')) {
-    // 重写，没有设置变量,执行Cookie获取
+  if (typeof $request != 'undefined') {
+    // 重写
     hasCookie = await getCookie()
   } else if (!(await checkEnv())) {
     // 未检测到ck，退出
