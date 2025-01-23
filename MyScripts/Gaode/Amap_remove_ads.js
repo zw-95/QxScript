@@ -465,9 +465,8 @@ try{
     if(obj?.data?.modules && obj.data.modules?.reviews){
       if(obj.data.modules?.reviews?.data?.write_comment){
         // 评价按钮修改文案
-        
-        obj.data.modules?.reviews?.data.write_comment.title = `<font color='#000000DE' size='32'>${obj.data.modules?.reviews?.data.write_comment.display_tips[0]}</font>`
-        obj.data.modules?.reviews?.data.write_comment.display_tips = []
+        obj.data.modules.reviews.data.write_comment.title = `<font color='#000000DE' size='32'>${obj.data.modules.reviews.data.write_comment.display_tips[0]}</font>`
+        obj.data.modules.reviews.data.write_comment.display_tips = []
       }
     }
 
@@ -745,7 +744,7 @@ try{
     // 商场楼层导航列表
     if(obj?.data?.floor_guide?.data?.items?.length > 0){
       // 去除评论、商品
-      for(var item of obj?.data?.floor_guide?.data?.items){
+      for(var item of obj.data.floor_guide.data.items){
         delete item.productsInfo
         item.recReason = {}
       }
