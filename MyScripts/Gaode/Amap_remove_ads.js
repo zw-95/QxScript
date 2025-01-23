@@ -286,7 +286,7 @@ try{
       "brand_shop_bar",
       // "brand_story",
       "checkIn",
-      // "check_in", // 足迹打卡
+      "check_in", // 足迹打卡
       "cityCardFeed", // 景点卡片
       // "cityPhoto", // 城市照片
       "city_discount", // 专业老师在线答疑
@@ -296,7 +296,7 @@ try{
       "common_coupon_bar", // 领券条幅 新客专享 省钱卡
       "common_coupon_card", // 优惠券卡片
       // "companyInfo", // 简介
-      // "comprehensiveEditEntrance", // 编辑地点信息
+      "comprehensiveEditEntrance", // 编辑地点信息
       // "consultancy",
       "contributor", // 地点贡献
       // "coupon_allowance",
@@ -428,8 +428,8 @@ try{
       "surround_selloffice",
       // "traffic", // 交通出行 地铁站 公交站 停车场
       "travelGuideRec", // 人气景点 路线 购票
-      // "uploadBar",
-      // "upload_bar", // 上传照片
+      "uploadBar",
+      "upload_bar", // 上传照片
       "verification", // 商家已入驻
       // "video",
       "waistRecEntrance", // 更多人气好去处
@@ -448,8 +448,8 @@ try{
       "detail_bottom_shop_service", // 出租租房在线底部固定行
       "hkfCalendarRecommend", // 春节火车票优惠订
       // "hkfMiniPortal", // 订火车票 订票页面 飞机 火车 汽车
-      // "societyPublicExperience", // 地图共建
-      "hkfTicketShelf", // 火车站详情页，自动查询的火车票列表，太占地儿了
+      "societyPublicExperience", // 地图共建
+      "hkfTicketShelf", // 火车站详情页，自动查询的火车票列表
       // "evaluateVO", // 菜品
       // "travelGuideAndQa", // 问大家
     ];
