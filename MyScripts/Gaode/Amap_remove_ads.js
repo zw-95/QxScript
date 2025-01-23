@@ -465,7 +465,7 @@ try{
     if(obj?.data?.modules && obj.data.modules?.reviews){
       if(obj.data.modules?.reviews?.data?.write_comment){
         // 评价按钮修改文案
-        obj.data.modules.reviews.data.write_comment.title = `<font color='#000000DE' size='32'>${obj.data.modules.reviews.data.write_comment.display_tips[0]}</font>`
+        obj.data.modules.reviews.data.write_comment.title = `<font color='#000000DE' size='25'>${obj.data.modules.reviews.data.write_comment.display_tips[0]}</font>`
         obj.data.modules.reviews.data.write_comment.display_tips = []
       }
     }
