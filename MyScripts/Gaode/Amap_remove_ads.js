@@ -466,7 +466,7 @@ try{
     if(obj?.data?.modules && obj.data.modules?.reviews){
       if(obj.data.modules?.reviews?.data?.write_comment){
         // 评价按钮修改文案
-        obj.data.modules.reviews.data.write_comment.btn_text = '评价'
+        obj.data.modules.reviews.data.write_comment.btn_text = '添加评价'
         obj.data.modules.reviews.data.write_comment.title = `<b><font color='#000000DE' size='30'>分享你的真实态度</font></b>`
         obj.data.modules.reviews.data.write_comment.display_tips = []
       }
