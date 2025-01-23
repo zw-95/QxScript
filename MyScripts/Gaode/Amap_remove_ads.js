@@ -453,7 +453,8 @@ try{
       // "evaluateVO", // 菜品
       // "travelGuideAndQa", // 问大家
       "kaMarketingCampaign", // 竞争营销，比如小米详情是apple店活动
-      // "commonGoodsShelf", // 商品列表，第三方链接，比如海底捞有抖音券的列表
+      // "commonGoodsShelf", // 第三方团购商品列表，比如海底捞有抖音券的列表
+      "kaProductMixServiceShelf", // 商品列表，例如大润发有饿了么的送货到家模块
     ];
     if (obj?.data?.modules) {
       for (let i of items) {
@@ -465,7 +466,8 @@ try{
     if(obj?.data?.modules && obj.data.modules?.reviews){
       if(obj.data.modules?.reviews?.data?.write_comment){
         // 评价按钮修改文案
-        obj.data.modules.reviews.data.write_comment.title = `<font color='#000000DE' size='25'>${obj.data.modules.reviews.data.write_comment.display_tips[0]}</font>`
+        obj.data.modules.reviews.data.write_comment.btn_text = '评价'
+        obj.data.modules.reviews.data.write_comment.title = `<b><font color='#000000DE' size='30'>分享你的真实态度</font></b>`
         obj.data.modules.reviews.data.write_comment.display_tips = []
       }
     }
