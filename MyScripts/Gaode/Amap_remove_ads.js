@@ -452,12 +452,25 @@ try{
       "hkfTicketShelf", // 火车站详情页，自动查询的火车票列表
       // "evaluateVO", // 菜品
       // "travelGuideAndQa", // 问大家
+      "kaMarketingCampaign", // 竞争营销，比如小米详情是apple店活动
+      // "commonGoodsShelf", // 商品列表，第三方链接，比如海底捞有抖音券的列表
     ];
     if (obj?.data?.modules) {
       for (let i of items) {
         delete obj.data.modules[i];
       }
     }
+
+    // 调整用户评价模块
+    if(obj?.data?.modules && obj.data.modules?.reviews){
+      if(obj.data.modules?.reviews?.data?.write_comment){
+        // 评价按钮修改文案
+        
+        obj.data.modules?.reviews?.data.write_comment.title = `<font color='#000000DE' size='32'>${obj.data.modules?.reviews?.data.write_comment.display_tips[0]}</font>`
+        obj.data.modules?.reviews?.data.write_comment.display_tips = []
+      }
+    }
+
   } else if (url.includes("/shield/search_business/process/marketingOperationStructured")) {
     // 详情页 顶部优惠横幅
     if (obj?.data?.tipsOperationLocation) {
@@ -727,6 +740,15 @@ try{
       obj.data.structShelf.data[0].shelf.list[0].list[0].list = obj.data.structShelf.data[0].shelf.list[0].list[0].list.filter(item=>{
         return item.productInfo.description.includes('需登录');
       });
+    }
+  } else if (url.includes("/ws/shield/search_business/process/poiDetail")) {
+    // 商场楼层导航列表
+    if(obj?.data?.floor_guide?.data?.items?.length > 0){
+      // 去除评论、商品
+      for(var item of obj?.data?.floor_guide?.data?.items){
+        delete item.productsInfo
+        item.recReason = {}
+      }
     }
   } else if (url.includes("/ws/shield/search_business/process/fill_order")) {
     // 订票详情页
