@@ -713,6 +713,11 @@ try{
     if(obj?.data?.aggregation_banners?.length > 0){
       obj.data.aggregation_banners = [];
     }
+  } else if (url.includes("/ws/activity/user_asset/loan_info")) {
+    // 钱包卡券-钱包，金融服务
+    if(obj?.data?.list?.length > 0){
+      obj.data.list = [];
+    }
   } else if (url.includes("/ws/user/theme/v3/feeds")) {
     // 主题页面
     // 去除收费语音
