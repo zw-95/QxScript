@@ -912,6 +912,18 @@ try{
         }
       }
     }
+  } else if(url.includes("/ws/c3frontend/af-order-center/order")){
+    // 酒店订单详情页多余模块
+    const items = [
+      "normalOperationActivityList",// 下单福利
+      "primaryRecommend", // 发现好去处
+      "feedsHeader"
+    ];
+    if (obj?.data?.modules) {
+      for (let i of items) {
+        delete obj.data.modules[i];
+      }
+    }
   } else if(url.includes("/ws/aos/perception/publicTravel/beforeNavi")){
     // 路线左上角圆形
     if(obj?.data?.front_end?.assistant?.length > 0){
