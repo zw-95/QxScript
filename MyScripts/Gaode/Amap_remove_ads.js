@@ -577,6 +577,11 @@ try{
           list.content = list.content.filter((i) => !["brandAdCard", "toplist_al"]?.includes(i?.item_type));
         }
       }
+      if (obj?.data?.modules?.listResult?.data?.list?.length > 0) {
+        obj.data.modules.listResult.data.list = obj.data.modules.listResult.data.list.filter(v =>{
+          return v.data.item_type != "brandAdCard"
+        });
+      }
     }
   } else if (url.includes("/shield/search_poi/sug")) {
     if (obj?.tip_list) {
