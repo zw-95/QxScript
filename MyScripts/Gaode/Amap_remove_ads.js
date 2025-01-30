@@ -916,6 +916,7 @@ try{
     // 酒店订单详情页多余模块
     const items = [
       "normalOperationActivityList", // 下单福利
+      "primaryOperationActivityList", // 下单福利
       "primaryRecommend", // 发现好去处
       "feedsHeader", //相关推荐
       "feeds", // 最下面的相关推荐列表
