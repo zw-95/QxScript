@@ -469,6 +469,7 @@ try{
         obj.data.modules.reviews.data.write_comment.btn_text = '添加评价'
         obj.data.modules.reviews.data.write_comment.title = `<b><font color='#000000DE' size='30'>分享你的真实态度</font></b>`
         obj.data.modules.reviews.data.write_comment.display_tips = []
+        obj.data.modules.reviews.data.write_comment.task_entrance = {}
       }
     }
 
