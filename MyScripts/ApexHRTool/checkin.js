@@ -58,31 +58,49 @@ async function main() {
     // await $.wait(randomTimeout*1000); //延迟
 
     // 查询当月考勤情况
-    let errorSignCount = await user.getCmthErrorCount()
-    if (errorSignCount != null && errorSignCount != undefined) {
-      $.log(`⚠本月考勤异常 ${errorSignCount} 天`)
+    let signSituation = await user.getCmthErrorCount()
+    if(signSituation){
+      if (signSituation.flowRecords.length > 0) {
+        $.log(`本月考勤异常 ${signSituation.flowRecords.length} 天`)
+        $.Messages.push(`本月考勤异常 ${signSituation.flowRecords.length} 天`)
+      }
+      if (signSituation.flowRecords.length > 0) {
+        $.log(`本月请假 ${signSituation.flowRecords.length} 天`)
+        $.Messages.push(`本月请假 ${signSituation.flowRecords.length} 天`)
+      }
+      if(signSituation.errorSignInRecords.length > 0){
+        $.log(`❗本月缺少考勤 ${signSituation.errorSignInRecords.length} 天，请及时处理`)
+        $.Messages.push(`❗本月缺少考勤 ${signSituation.errorSignInRecords.length} 天，请及时处理`)
+        $.log(signSituation.errorSignInRecords.map((v) => ` - ${v.f2} ${v.f6CN}`).join('\n'))
+        $.Messages.push(signSituation.errorSignInRecords.map((v) => ` - ${v.f2} ${v.f6CN}`).join('\n'))
+      }
     } else {
+      $.Messages.push(`❌账号${user.user} >> 查询本月签到记录失败!`)
       $.log(`❌账号${user.user} >> 查询本月签到记录失败!`)
     }
 
     // 签到前校验
     await user.getSignTimeRange()
     if (!user.isWorkOffTime) {
+      $.Messages.push(`❌账号${user.user} >> 非打卡时间!`)
       $.log(`❌账号${user.user} >> 非打卡时间!`)
       return
     }
     await user.checkLog()
     if (!user.logStat) {
+      $.Messages.push(`❌账号${user.user} >> 请填写日志后再打卡!`)
       $.log(`❌账号${user.user} >> 请填写日志后再打卡!`)
       return
     }
     await user.checkSignRecord()
     if (!user.checkStat) {
+      $.Messages.push(`❌账号${user.user} >> 校验签到记录失败!`)
       $.log(`❌账号${user.user} >> 校验签到记录失败!`)
       return
     }
     await user.checkPosiConfig()
     if (!user.posiStat) {
+      $.Messages.push(`❌账号${user.user} >> 校验位置失败!`)
       $.log(`❌账号${user.user} >> 校验位置失败!`)
       return
     }
@@ -95,6 +113,7 @@ async function main() {
         $.Messages.push(`签到地点:${user.getPosiName()}，`)
       }
     } else {
+      $.Messages.push(`❌账号${user.user} >> 签到失败!`)
       $.log(`❌账号${user.user} >> 签到失败!`)
     }
     $.log(`🔷账号${user.user} >> 结束任务`)
@@ -332,23 +351,13 @@ class UserInfo {
           // 未处理的异常考勤
           var errorSignInRecords = body.records.filter((record) => ![...signInRecords, ...flowRecords, ...leaveRecords].includes(record));
 
-          if (flowRecords.length > 0) {
-            $.log(`本月考勤异常 ${flowRecords.length} 天`)
-            $.Messages.push(`本月考勤异常 ${flowRecords.length} 天`)
-          }
-          if (flowRecords.length > 0) {
-            $.log(`本月请假 ${leaveRecords.length} 天`)
-            $.Messages.push(`本月请假 ${leaveRecords.length} 天`)
-          }
-          if(errorSignInRecords.length > 0){
-            $.log(`❗本月缺少考勤 ${errorSignInRecords} 天，请及时处理`)
-            $.Messages.push(`❗本月缺少考勤 ${errorSignInRecords} 天，请及时处理`)
-            $.log(errorSignInRecords.map((v) => `🔴${v.f6CN}`).join('\n'))
-            $.Messages.push(errorSignInRecords.map((v) => `🔴${v.f6CN}`).join('\n'))
-          }
         }
       }
-      return errorSignInRecords.length
+      return { 
+        signInRecords,
+        flowRecords,
+        errorSignInRecords,
+      }
     } catch (e) {
       throw e
     }
