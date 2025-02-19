@@ -469,6 +469,7 @@ try{
         obj.data.modules.reviews.data.write_comment.btn_text = '添加评价'
         obj.data.modules.reviews.data.write_comment.title = `<b><font color='#000000DE' size='30'>分享你的真实态度</font></b>`
         obj.data.modules.reviews.data.write_comment.display_tips = []
+        obj.data.modules.reviews.data.write_comment.task_entrance = {}
       }
     }
 
@@ -575,6 +576,11 @@ try{
           // brandAdCard广告卡片 toplist_al人气榜单 高德指南
           list.content = list.content.filter((i) => !["brandAdCard", "toplist_al"]?.includes(i?.item_type));
         }
+      }
+      if (obj?.data?.modules?.listResult?.data?.list?.length > 0) {
+        obj.data.modules.listResult.data.list = obj.data.modules.listResult.data.list.filter(v =>{
+          return v.data.item_type != "brandAdCard"
+        });
       }
     }
   } else if (url.includes("/shield/search_poi/sug")) {
@@ -712,6 +718,11 @@ try{
     // 去除banner
     if(obj?.data?.aggregation_banners?.length > 0){
       obj.data.aggregation_banners = [];
+    }
+  } else if (url.includes("/ws/activity/user_asset/loan_info")) {
+    // 钱包卡券-钱包，金融服务
+    if(obj?.data?.list?.length > 0){
+      obj.data.list = [];
     }
   } else if (url.includes("/ws/user/theme/v3/feeds")) {
     // 主题页面
@@ -910,6 +921,20 @@ try{
           item.card.data.rank_info.rank_no = "";
           item.card.data.rank_info.poi_list_icon = "";
         }
+      }
+    }
+  } else if(url.includes("/ws/c3frontend/af-order-center/order")) {
+    // 酒店订单详情页多余模块
+    const items = [
+      "normalOperationActivityList", // 下单福利
+      "primaryOperationActivityList", // 下单福利
+      "primaryRecommend", // 发现好去处
+      "feedsHeader", //相关推荐
+      "feeds", // 最下面的相关推荐列表
+    ];
+    if (obj?.data?.modules) {
+      for (let i of items) {
+        delete obj.data.modules[i];
       }
     }
   } else if(url.includes("/ws/aos/perception/publicTravel/beforeNavi")){
