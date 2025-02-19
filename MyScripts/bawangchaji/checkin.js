@@ -300,6 +300,7 @@ async function getCookie() {
                       newActivityId: activityId
                   }
                   $.store = $.storeAccount[store];
+                  debug($.store);
                   // 保存更改
                   $.setjson($.storeAccount, ckName);
                   break;
