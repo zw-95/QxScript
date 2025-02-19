@@ -61,17 +61,14 @@ async function main() {
     let errorSignCount = await user.getCmthErrorCount()
     if (errorSignCount != null && errorSignCount != undefined) {
       $.log(`⚠本月考勤异常 ${errorSignCount} 天`)
-      if (errorSignCount > 0) {
-        $.Messages.push(`⚠本月考勤异常 ${errorSignCount} 天，请及时处理`)
-      }
     } else {
       $.log(`❌账号${user.user} >> 查询本月签到记录失败!`)
     }
 
     // 签到前校验
     await user.getSignTimeRange()
-    if (!user.isWorkTime) {
-      $.log(`❌账号${user.user} >> 不在上班时间!`)
+    if (!user.isWorkOffTime) {
+      $.log(`❌账号${user.user} >> 非打卡时间!`)
       return
     }
     await user.checkLog()
@@ -100,6 +97,7 @@ async function main() {
     } else {
       $.log(`❌账号${user.user} >> 签到失败!`)
     }
+    $.log(`🔷账号${user.user} >> 结束任务`)
   }
 }
 
@@ -111,7 +109,7 @@ class UserInfo {
     this.logStat = false // 是否正常填写日志
     this.checkStat = false // 是否可以正常打卡
     this.posiStat = false // 定位状态
-    this.isWorkTime = false // 是否工作时间
+    this.isWorkOffTime = false // 是否非工作时间
     this.worktimeBegin = '' //工作开始时间
     this.worktimeEnd = '' //工作结束时间
     this.signCorpName = '' // 签到地点名称
@@ -152,7 +150,6 @@ class UserInfo {
   async getSignTimeRange() {
     try {
       var now = Math.floor(new Date() / 1000)
-      const toDay = formatTimestamp(now)
       const options = {
         url: `https://${hrHost}/config`,
         headers: this.headers,
@@ -161,8 +158,6 @@ class UserInfo {
       let res = await this.Request(options, 'get')
       debug(res, `查询工作时间范围`)
       var body = res
-      var hours = new Date().getHours()
-      var mins = new Date().getMinutes()
       if (body.code == 1) {
         this.worktimeBegin = body.worktimeBegin
         this.worktimeEnd = body.worktimeEnd
@@ -170,14 +165,14 @@ class UserInfo {
         var workTimeType = checkCurrentTime(body.worktimeBegin, body.worktimeEnd)
         if (workTimeType == 1) {
           // 已下班
-          this.isWorkTime = true
+          this.isWorkOffTime = true
         } else if (workTimeType == 0) {
           // 上班期间
-          this.isWorkTime = false
+          this.isWorkOffTime = false
           $.log(`上班期间，无法打卡！`)
         } else if (workTimeType == -1) {
-          // 上班之前
-          this.isWorkTime = true
+          // 上午上班之前
+          this.isWorkOffTime = true
         }
       }
     } catch (e) {
@@ -311,20 +306,13 @@ class UserInfo {
   //查询本月签到记录，查出不正常的天数（不包括今天）
   async getCmthErrorCount() {
     try {
-      var errorSignCount
-      var now = new Date()
-      var year = now.getUTCFullYear()
-      var month = now.getUTCMonth()
-      var mthBegin = formatTimestamp(new Date(year, month, 1).getTime() / 1000)
-
-      if (month === 11) {
-        year += 1
-        month = 0
-      } else {
-        month += 1
-      }
-
-      const mthEnd = formatTimestamp(new Date(year, month, 31).getTime() / 1000)
+      var now = new Date();
+      var year = now.getUTCFullYear();
+      var month = now.getUTCMonth();
+      // 计算当月第一天（UTC时间）
+      var mthBegin = formatTimestamp(Date.UTC(year, month, 1) / 1000);
+      // 计算次月第一天（UTC时间）
+      var mthEnd = formatTimestamp(Date.UTC(year, month + 1, 1) / 1000);
       const options = {
         url: `https://${hrHost}/register/attendance/t98/query?beginDate=${mthBegin}&endDate=${mthEnd}&pageSize=35&pageNum=1`,
         headers: this.headers,
@@ -335,16 +323,32 @@ class UserInfo {
       var body = res
       if (body) {
         if (body.code == 1) {
-          var errorSignInRecords = body.records.filter(
-            (v) => v.f6CN !== '正常上下班' && v.f2 != formatTimestamp(now.getTime() / 1000)
-          )
-          if (errorSignInRecords.length > 0) {
-            $.Messages.push(errorSignInRecords.map((v) => v.f2 + v.f8).join('\n'))
+          // 正常打卡天数
+          var signInRecords = body.records.filter((v) => ['正常上下班'].includes(v.f6CN));
+          // 考勤异常天数
+          var flowRecords = body.records.filter((v) => ['考勤异常'].includes(v.f6CN));
+          // 请假天数
+          var leaveRecords = body.records.filter((v) => ['休假'].includes(v.f6CN));
+          // 未处理的异常考勤
+          var errorSignInRecords = body.records.filter((record) => ![...signInRecords, ...flowRecords, ...leaveRecords].includes(record));
+
+          if (flowRecords.length > 0) {
+            $.log(`本月考勤异常 ${flowRecords.length} 天`)
+            $.Messages.push(`本月考勤异常 ${flowRecords.length} 天`)
           }
-          errorSignCount = errorSignInRecords.length
+          if (flowRecords.length > 0) {
+            $.log(`本月请假 ${leaveRecords.length} 天`)
+            $.Messages.push(`本月请假 ${leaveRecords.length} 天`)
+          }
+          if(errorSignInRecords.length > 0){
+            $.log(`❗本月缺少考勤 ${errorSignInRecords} 天，请及时处理`)
+            $.Messages.push(`❗本月缺少考勤 ${errorSignInRecords} 天，请及时处理`)
+            $.log(errorSignInRecords.map((v) => `🔴${v.f6CN}`).join('\n'))
+            $.Messages.push(errorSignInRecords.map((v) => `🔴${v.f6CN}`).join('\n'))
+          }
         }
       }
-      return errorSignCount
+      return errorSignInRecords.length
     } catch (e) {
       throw e
     }
@@ -566,11 +570,10 @@ function generateRandomCoordinates(lat, lon, distance) {
 // 格式化时间戳为日期
 function formatTimestamp(timestampInSeconds) {
   var date = new Date(timestampInSeconds * 1000)
-  var year = date.getUTCFullYear() // 使用UTC函数避免时区问题
-  var month = date.getUTCMonth() + 1 // 月份是从1开始的
-  var day = date.getUTCDate()
-  var formattedDate = year + '-' + month.toString().padStart(2, '0') + '-' + day.toString().padStart(2, '0')
-  return formattedDate
+  var year = date.getUTCFullYear();
+  var month = date.getUTCMonth() + 1;
+  var day = date.getUTCDate();
+  return year + '-' + month.toString().padStart(2, '0') + '-' + day.toString().padStart(2, '0');
 }
 //随机整数生成
 function randomInt(min, max) {
