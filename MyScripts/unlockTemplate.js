@@ -9,6 +9,7 @@ https:\/\/xxx\.com\/xxx url script-response-body https://raw.githubusercontent.c
 hostname = xxx.com
 ==============================
 */
+$.Messages = []
 
 const url = $request.url;
 if (!$response.body) $done({});
@@ -21,6 +22,31 @@ if (url.includes("/xxx")) {
 console.log('bitwarden已解锁')
 $done({ body: JSON.stringify(obj) });
 
+
+// ==================================== 通用函数 ====================================
+
+// DEBUG
+function debug(text, title = 'debug') {
+  if ($.is_debug === 'true') {
+    if (typeof text == 'string') {
+      console.log(`\n-----------${title}------------\n`)
+      console.log(text)
+      console.log(`\n-----------${title}------------\n`)
+    } else if (typeof text == 'object') {
+      console.log(`\n-----------${title}------------\n`)
+      console.log($.toStr(text))
+      console.log(`\n-----------${title}------------\n`)
+    }
+  }
+}
+function pushMsg(text){
+  $.Messages.push(text)
+  $.log(`通知内容：${text}`)
+}
+//随机整数生成
+function randomInt(min, max) {
+  return Math.round(Math.random() * (max - min) + min)
+}
 //Bark APP notify
 async function BarkNotify(c, k, t, b) { for (let i = 0; i < 3; i++) { console.log(`🔷Bark notify >> Start push (${i + 1})`); const s = await new Promise((n) => { c.post({ url: 'https://api.day.app/push', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title: t, body: b, device_key: k, ext_params: { group: t } }) }, (e, r, d) => r && r.status == 200 ? n(1) : n(d || e)) }); if (s === 1) { console.log('✅Push success!'); break } else { console.log(`❌Push failed! >> ${s.message || s}`) } } };
 
