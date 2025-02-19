@@ -407,7 +407,8 @@ async function getCookie() {
     if (userCookie && xAuthUser) {
       $.setdata(userCookie, ckName)
       $.setdata(xAuthUser, xAuthUserName)
-      pushMsg(`获取 Cookie 成功:${xAuthUser},${userCookie},请手动执行任务打卡`)
+      pushMsg(`获取会话成功,请手动执行任务打卡`)
+      $.log(`会话参数:${xAuthUser},${userCookie}`)
       return true
     } else {
       pushMsg('获取 Cookie失败 ❌')
