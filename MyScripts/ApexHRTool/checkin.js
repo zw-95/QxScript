@@ -336,7 +336,7 @@ class UserInfo {
           // 请假天数
           var leaveRecords = body.records.filter((v) => ['休假'].includes(v.f6CN));
           // 未处理的缺勤，不包括今天
-          var errorSignInRecords = body.records.filter((record) => ![...signInRecords, ...flowRecords, ...leaveRecords].includes(record) && v.f2 != formatTimestamp(now.getTime() / 1000));
+          var errorSignInRecords = body.records.filter((v) => ![...signInRecords, ...flowRecords, ...leaveRecords].includes(v) && v.f2 != formatTimestamp(now.getTime() / 1000));
 
         }
       }
