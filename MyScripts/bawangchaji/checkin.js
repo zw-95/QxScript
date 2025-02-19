@@ -12,16 +12,23 @@
 2.手动完成一次签到,收录活动id
 
 [Script]
-// http-response ^https:\/\/(webapi|webapi2|miniapp)\.qmai\.cn\/web\/seller\/(oauth\/flash-sale-login|account\/login-minp) script-path=https://raw.githubusercontent.com/zw-95/QxScript/master/MyScripts/bawangchaji/checkin.js, requires-body=true, timeout=60, tag=奶茶获取token
-// http-request ^https:\/\/(webapi|webapi2|qmwebapi|miniapp)\.qmai\.cn\/web\/(catering\/integral|cmk-center)\/sign\/(signIn|takePartInSign) script-path=https://raw.githubusercontent.com/zw-95/QxScript/master/MyScripts/bawangchaji/checkin.js, requires-body=true, timeout=60, tag=奶茶获取token
+# 原脚本重写：
+// http-response ^https:\/\/(webapi|webapi2)\.qmai\.cn\/web\/seller\/(oauth\/flash-sale-login|account\/login-minp) script-path=https://gist.githubusercontent.com/Sliverkiss/8b4f5487e0f28786c7dec9c7484dcd5e/raw/teaMilk.js, requires-body=true, timeout=60, tag=奶茶获取token
+// http-request ^https:\/\/(webapi|webapi2|qmwebapi)\.qmai\.cn\/web\/(catering\/integral|cmk-center)\/sign\/(signIn|takePartInSign) script-path=https://gist.githubusercontent.com/Sliverkiss/8b4f5487e0f28786c7dec9c7484dcd5e/raw/teaMilk.js, requires-body=true, timeout=60, tag=奶茶获取token
 
-http-request ^https:\/\/(miniapp)\.qmai\.cn\/web\/cmk-center\/sign\/userSignStatistics script-path=https://raw.githubusercontent.com/zw-95/QxScript/master/MyScripts/bawangchaji/checkin.js, requires-body=true, timeout=60, tag=奶茶获取token
+# 远程
+http-request ^https:\/\/(webapi|webapi2|miniapp)\.qmai\.cn\/web\/cmk-center\/sign\/userSignStatistics script-path=https://raw.githubusercontent.com/zw-95/QxScript/master/MyScripts/bawangchaji/checkin.js, requires-body=true, timeout=60, tag=奶茶获取token
+http-response ^https:\/\/(webapi|webapi2|miniapp)\.qmai\.cn\/web\/seller\/(user|oauth)\/(flash-sale-login|bind-mobile-by-wechat) script-path=https://raw.githubusercontent.com/zw-95/QxScript/master/MyScripts/bawangchaji/checkin.js, requires-body=true, timeout=60, tag=奶茶获取token
+
+# 本地调试
+// http-request ^https:\/\/(webapi|webapi2|miniapp)\.qmai\.cn\/web\/cmk-center\/sign\/userSignStatistics script-path=http://10.86.11.222:5500/MyScripts/bawangchaji/checkin.js, requires-body=true, timeout=60, tag=奶茶获取token
+// http-response ^https:\/\/(webapi|webapi2|miniapp)\.qmai\.cn\/web\/seller\/(user|oauth)\/(flash-sale-login|bind-mobile-by-wechat) script-path=http://10.86.11.222:5500/MyScripts/bawangchaji/checkin.js, requires-body=true, timeout=60, tag=奶茶获取token
 
 [MITM]
-hostname = webapi2.qmai.cn,webapi.qmai.cn,qmwebapi.qmai.cn,miniapp.qmai.cn
+hostname = webapi2.qmai.cn,webapi.qmai.cn,miniapp.qmai.cn
 
 */
-const $ = new Env("bwcj");
+const $ = new Env("霸王茶姬");
 const ckName = "bwcj_data";
 const userCookie = $.toObj($.isNode() ? process.env[ckName] : $.getdata(ckName)) || {};
 //notify
@@ -47,7 +54,7 @@ $.storeAccount = {
     ...userCookie
 }
 //------------------------------------------
-const baseUrl = "https://miniapp.qmai.cn"
+const baseUrl = "https://webapi2.qmai.cn"
 const _headers = {
     'Qm-User-Token': "",
     'Qm-From': 'wechat',
@@ -110,21 +117,28 @@ async function bwcjCheckin(store) {
         let o = { appid: store.appId, oldActivityId: store.oldActivityId, newActivityId: store.newActivityId, storeId: store.storeId }
         if (store?.appId) {
             let pointF = await getPoint(o);
-            store?.oldActivityId && await oldSignin(o);
+            // store?.oldActivityId && await oldSignin(o);
             let userId = await getUserId(o);
             store?.newActivityId && await newSignin(o, userId);
             let pointE = await getPoint(o);
             let signDays = await userSignStatistics(o);
             //判断ck状态
-            !$.ckStatus
-                ? $.notifyMsg.push(`[${user.userName}] 签到失败,登录已过期`)
-                : ($.notifyMsg.push(`[${user.userName}] 积分:${pointF}+${pointE - 0 - pointF} 签到天数:${signDays}`), $.succCount++);
+            if(!$.ckStatus){
+              $.notifyMsg.push(`[${user.userName}] 签到失败,登录已过期`)
+            } else if (!store.isCheck){
+              // 签到失败
+              $.notifyMsg.push(`[${user.userName}] ${$.doFlag.false} 积分:${pointF}+${pointE - 0 - pointF} 签到天数:${signDays}\n错误信息：[${o.msg}]`);
+            } else{
+              // 签到成功
+              $.notifyMsg.push(`[${user.userName}] ${$.doFlag.true} 积分:${pointF}+${pointE - 0 - pointF} 签到天数:${signDays}`);
+              succCount++;
+            }
         } else {
             $.log(`[INFO] 活动id不存在,停止执行「${store.name}」签到任务\n`);
             break;
         }
         //休眠5秒
-        await $.wait(5e3);
+        await $.wait(2e3);
     }
     $.notifyList.push({
         name: `${store.name}签到`,
@@ -147,6 +161,7 @@ async function bwcjCheckin(store) {
                 console.log("[INFO] 旧签到接口:" + message + "\n");
             } else {
                 $.log(`[ERROR] signIn签到错误：${message} `);
+                $.notifyMsg.push($.name +`签到(旧api)错误：${message}`);
             }
         } catch (e) {
             $.log(e);
@@ -165,8 +180,11 @@ async function bwcjCheckin(store) {
             let { code, message, data, status } = await fetch(opts) ?? {};
             if (code == 0 || code == 400041) {
                 console.log("[INFO] 新签到接口:" + message + "\n");
+                o.isCheck = true;
             } else {
                 $.log(`[ERROR] takePartInSign签到错误：${message}`);
+                o.isCheck = false;
+                o.msg= `签到(新api)错误：${message}`;
             }
         } catch (e) {
             $.log(e);
@@ -243,22 +261,7 @@ async function bwcjCheckin(store) {
             $.log(e);
         }
     }
-      //查询活动id，小程序id
-      async function getPointNew(o) {
-        try {
-            const opts = {
-                url: `/web/catering2-apiserver/common/common-info`,
-                type: "post", dataType: "json",
-                body: {"app":1,"types":["catering.pagedefaultimg","catering.memberCenter","catering.userCoverPicture","catering.shareData","catering.orderData","catering.goodsDetailData","catering.buyData","catering.blindBoxData","catering.integrationData","catering.pageData","catering.memberRightsData","catering.storedValueMemberRightsData","catering.togetherGetCouponsData","catering.giftCardListData","catering.couponCenterData","catering.groupMeal","catering.textData","catering.orderDetail","catering.togetherOrderData","catering.mallDetailData","catering.payMemberRightsData","catering.colorData","catering.workWeChatCustomer","catering.workWeChatGroupChat","catering.newTextDataV2","catering.studentCertification","catering.confirmOrder","catering.batchGiftCoupon","catering.tabBarData","catering.homeCover","catering.templateGoodsData","catering.collectStar","catering.packageData","catering.cateringData","catering.defaultData"],"configCenterKeyList":["Coupon.Exchange.Auto.Config","Coupon.Product.Buy.config","Crm.PointsDraw","Crm.Balance.IsOther","Crm.Coupon.IsOther","Crm.GiftCard.IsOther","Preferential.Computing.Engine","Preferential.Engine.Computing.Category","Preferential.Engine.Version4","Nickname.unallowed","System.Copyright.IsShow","Order.ShoppingCart.Discount","Crm.AssetsIntegration.IsOther","switch.seller.order.up_auth_alipay","member.code.WeChat.Pay","Member.Sign.Time","Favourable.Sign.Time","Present.Sign.Time","Giftcard.Buyhome.config","Order.Points.Experience.IsOpen","ShoppingCart.Show.Total","Crm.PersonalCenter.IsModify","Crm.Member.IsOther","opened.wechat.membership.card","Member.Level.Experience","Value.Purchase.Optimization","OrderPageChannelSelection","Waiter.Order.Account","Store.Business.Hours.Display","Registration.Switch.Display","Submit.Order.Display.Queue","Whether.Add.Loading","yiwangtongzhifukaiguan","yiwangtongzhifuhuodong","Gift.Card.Pay.QR","Crm.GiftCard.IsOffLine","Payment.Password","Automatically.Push.Time","show.takeaway","GiftCard.Type.Hidden","Reading.StoredValue.Agreement","Control.Secondarycard.Share","Preferential.Engine.Recommend.Coupon","Switch.Goods.Predictprice","Preferential.Engine.PrePrice.IsShow","Order.Channel-Change.Show.Switch","Order.starzies","Switch.Payment.Fuyou.Plugin","Switch.New.Mall.Enable","Premium.Membership.Isother","PaidMember.OrderDetails.TruePrice","Gray.home.page","Design.internationalization","Preferential.Engine.Noshare.Warnning","New.Points.mall","Pay.Switch.Channels","Daojia.Service.Open","Group.Coupons.Delivery.Use","Goods.Nutritional.Components","Coupon.Show.Group","Order.User.Notes.Config","Store.Stored.Value","Coupons.Quick.Verification","Order.Confirm.Buy.Membercard"],"appid":"wxafec6f8422cb357b"}
-            }
-            let res = await fetch(opts);
-            if (!(res?.code == 0 || res?.code == 400041)) throw new Error(res?.msg || `用户需要去登录`);
-            return res?.data;
-        } catch (e) {
-            $.ckStatus = false;
-            $.log(e);
-        }
-    }
+
 }
 
 //查询店铺信息
@@ -289,8 +292,8 @@ async function getCookie() {
         // 根据获取用户状态接口，捕获活动id，appId，token
         if ($request.url.includes('/web/cmk-center/sign/userSignStatistics')) {
           const { appid, activityId } = $.toObj($request.body);
-          const { "qm-user-token": token } = ObjectKeys2LowerCase($request.headers);
-          let storeId = await getTitle({ token, appid });
+          const { "qm-user-token": token, "store-id" : storeId } = ObjectKeys2LowerCase($request.headers);
+          // let storeId = await getTitle({ token, appid });
           for (let store in $.storeAccount) {
               if (store == storeId) {
                   $.storeAccount[store] = {
@@ -309,33 +312,12 @@ async function getCookie() {
           // 发送消息
           const message = $.store?.appId ? `🎉 获取${$.store.name}活动id成功!` : `❌ 获取${$.store.name}活动id失败!`;
           $.msg($.name, message, "");
-        } /*else if ($request.url.match(/sign/)) {
-            const { appid, activityId } = $.toObj($request.body);
-            const { "qm-user-token": token } = ObjectKeys2LowerCase($request.headers);
-            let storeId = await getTitle({ token, appid });
-            for (let store in $.storeAccount) {
-                if (store == storeId) {
-                    $.storeAccount[store] = {
-                        ...$.storeAccount[store],
-                        appId: appid,
-                        oldActivityId: activityId,
-                        newActivityId: activityId
-                    }
-                    $.store = $.storeAccount[store];
-                    // 保存更改
-                    $.setjson($.storeAccount, ckName);
-                    break;
-                }
-            }
-            // 发送消息
-            const message = $.store?.appId ? `🎉 获取${$.store.name}活动id成功!` : `❌ 获取${$.store.name}活动id失败!`;
-            $.msg($.name, message, "");
-        }*/ else {
+        } else {
             const body = $.toObj($response?.body) ?? "";
             if (!body) throw new Error("Surge用户: 手动运行请切换到Cron环境");
-            const { store: { id: storeId, name }, user: { mobile }, token } = body?.data
+            const { store: { id: storeId, name }, user: { mobile }, token } = body.data.loginToken || body.data
 
-            if (!mobile) throw new Error(`获取ck失败，请先登录并绑定手机号`);
+            if (!mobile) throw new Error(`获取手机号失败，请先登录并绑定手机号`);
 
             const newData = {
                 "userId": mobile,
@@ -350,7 +332,7 @@ async function getCookie() {
                     userList: [newData]
                 }
                 $.setjson($.storeAccount, ckName);
-                return $.msg($.name, `🎉收录${name}小程序成功!`, "请手动完成一次签到，获取活动id");
+                return $.msg($.name, `🎉收录${name}小程序成功!`, "请打开签到页面，获取活动id");
             }
             let account = $.storeAccount[storeId];
             let userList = account.userList || [];
