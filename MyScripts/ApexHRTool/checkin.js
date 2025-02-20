@@ -57,23 +57,6 @@ async function main() {
     // $.log(`随机延迟 ${randomTimeout} 秒`)
     // await $.wait(randomTimeout*1000); //延迟
 
-    // 查询当月考勤情况
-    let signSituation = await user.getCmthErrorCount()
-    if(signSituation){
-      if (signSituation.flowRecords.length > 0) {
-        pushMsg(`本月考勤异常 ${signSituation.flowRecords.length} 天`)
-      }
-      if (signSituation.flowRecords.length > 0) {
-        pushMsg(`本月请假 ${signSituation.flowRecords.length} 天`)
-      }
-      if(signSituation.errorSignInRecords.length > 0){
-        pushMsg(`❗本月缺勤 ${signSituation.errorSignInRecords.length} 天，请及时处理`)
-        pushMsg(signSituation.errorSignInRecords.map((v) => `${v.f2} ${v.f6CN}`).join('\n'))
-      }
-    } else {
-      pushMsg(`❌账号${user.user} >> 查询本月签到记录失败!`)
-    }
-
     // 签到前校验
     await user.getSignTimeRange()
     if (!user.isWorkOffTime) {
@@ -106,6 +89,24 @@ async function main() {
     } else {
       pushMsg(`❌账号${user.user} >> 签到失败!`)
     }
+
+    // 查询当月考勤情况
+    let signSituation = await user.getCmthErrorCount()
+    if(signSituation){
+      if (signSituation.flowRecords.length > 0) {
+        pushMsg(`本月考勤异常 ${signSituation.flowRecords.length} 天`)
+      }
+      if (signSituation.leaveRecords.length > 0) {
+        pushMsg(`本月请假 ${signSituation.leaveRecords.length} 天`)
+      }
+      if(signSituation.errorSignInRecords.length > 0){
+        pushMsg(`❗本月缺勤 ${signSituation.errorSignInRecords.length} 天，请及时处理`)
+        pushMsg(signSituation.errorSignInRecords.map((v) => `${v.f2} ${v.f6CN}`).join('\n'))
+      }
+    } else {
+      pushMsg(`❌账号${user.user} >> 查询本月签到记录失败!`)
+    }
+
     $.log(`🔷账号${user.user} >> 结束任务`)
   }
 }
