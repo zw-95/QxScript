@@ -344,6 +344,7 @@ class UserInfo {
       return { 
         signInRecords,
         flowRecords,
+        leaveRecords,
         errorSignInRecords,
       }
     } catch (e) {
