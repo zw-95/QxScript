@@ -354,7 +354,7 @@ try{
       "movie_info", // 优惠购票 景点宣传片
       "multi_page_anchor", // 二级导航菜单 门票 评论 推荐
       // "navbarMore", // 右上角三点
-      // "nearbyRecommendModule", // 周边推荐
+      "nearbyRecommendModule", // 周边推荐
       "nearby_house",
       "nearby_new_house_estate",
       "nearby_office_estate",
