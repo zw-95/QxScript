@@ -995,6 +995,13 @@ try{
       }
     }
     
+  } else if (url.includes("/ws/faas/amap-navigation/footprint")) {
+    // 足迹页面
+    // 角落
+    const items = [
+      "CommonFootprintBannerCard"
+    ];
+    obj?.data?.town = obj?.data?.town.filter(v => items.some(i => v.dataKey === i));
   }
 } catch (error) {
   console.log("An error occurred:", error.name); // 错误名称
