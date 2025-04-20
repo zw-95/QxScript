@@ -1000,7 +1000,7 @@ try{
     const items = ["CommonFootprintBannerCard"];
     if (Array.isArray(obj?.data?.town)) {
       obj.data.town = obj.data.town.filter(v => 
-        v?.dataKey && items.includes(v.dataKey)
+        v?.dataKey && !items.includes(v.dataKey)
       );
     }
   }
