@@ -455,6 +455,7 @@ try{
       "kaMarketingCampaign", // 竞争营销，比如小米详情是apple店活动
       // "commonGoodsShelf", // 第三方团购商品列表，比如海底捞有抖音券的列表
       "kaProductMixServiceShelf", // 商品列表，例如大润发有饿了么的送货到家模块
+      "commonAiAgent", // 问ai，回答一点都不智能
     ];
     if (obj?.data?.modules) {
       for (let i of items) {
