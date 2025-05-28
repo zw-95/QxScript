@@ -42,7 +42,7 @@ http-response ^http:\/\/amdc\.m\.taobao\.com\/amdc\/mobileDispatch$ script-path 
 
 # 导航详情页 - 路线规划、地点详情页、搜索详情页、导航结束页
 http-response ^https:\/\/m5\.amap\.com\/ws\/perception\/drive\/(routeInfo|routePlan)\? script-path = http://raw.githubusercontent.com/zw-95/QxScript/master/MyScripts/Gaode/Amap_remove_ads.js, requires-body = true, tag = 移除导航详情页扰人组件
-http-response ^https:\/\/m5\.amap\.com\/ws\/shield\/search\/(common\/coupon\/info|poi\/detail)\? script-path = http://raw.githubusercontent.com/zw-95/QxScript/master/MyScripts/Gaode/Amap_remove_ads.js, requires-body = true, tag = 移除导航详情页扰人组件
+http-response ^https:\/\/(m5|info)\.amap\.com\/ws\/shield\/search\/(common\/coupon\/info|poi\/detail)\? script-path = http://raw.githubusercontent.com/zw-95/QxScript/master/MyScripts/Gaode/Amap_remove_ads.js, requires-body = true, tag = 移除导航详情页扰人组件
 http-response ^https:\/\/m5\.amap\.com\/ws\/shield\/search_business\/process\/marketingOperationStructured\? script-path = http://raw.githubusercontent.com/zw-95/QxScript/master/MyScripts/Gaode/Amap_remove_ads.js, requires-body = true, tag = 移除导航详情页扰人组件
 http-response ^https:\/\/m5\.amap\.com\/ws\/shield\/search_poi\/(homepage|mps|search\/sp|sug|tips_operation_location)\? script-path = http://raw.githubusercontent.com/zw-95/QxScript/master/MyScripts/Gaode/Amap_remove_ads.js, requires-body = true, tag = 移除导航详情页扰人组件
 
@@ -103,4 +103,4 @@ http-response ^https:\/\/m5\.amap\.com\/ws\/aos\/perception\/publicTravel\/befor
 http-response ^https:\/\/m5\.amap\.com\/ws\/shield\/search_business\/process\/query\/poi\/info script-path = http://raw.githubusercontent.com/zw-95/QxScript/master/MyScripts/Gaode/Amap_remove_ads.js, requires-body = true, tag = 移除车主页面广告
 
 [Mitm]
-hostname = m5.amap.com, m5-zb.amap.com, oss.amap.com, sns.amap.com, awaken.amap.com
+hostname = m5.amap.com, m5-zb.amap.com, info.amap.com, oss.amap.com, sns.amap.com, awaken.amap.com
