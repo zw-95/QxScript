@@ -102,5 +102,9 @@ http-response ^https:\/\/m5\.amap\.com\/ws\/aos\/perception\/publicTravel\/befor
 # 车主页面
 http-response ^https:\/\/m5\.amap\.com\/ws\/shield\/search_business\/process\/query\/poi\/info script-path = http://raw.githubusercontent.com/zw-95/QxScript/master/MyScripts/Gaode/Amap_remove_ads.js, requires-body = true, tag = 移除车主页面广告
 
+# 足迹-角落
+http-response ^https:\/\/m5\.amap\.com\/ws\/faas\/amap-navigation\/footprint script-path = http://raw.githubusercontent.com/zw-95/QxScript/master/MyScripts/Gaode/Amap_remove_ads.js, requires-body = true, tag = 足迹-角落广告
+
+
 [Mitm]
 hostname = m5.amap.com, m5-zb.amap.com, info.amap.com, oss.amap.com, sns.amap.com, awaken.amap.com

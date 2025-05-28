@@ -14,7 +14,7 @@ QX 1.0.10+ :
 #顶点HR签到Cookie
 //^https:\/\/hrtool\.apexsoft\.com\.cn\/register\/attendance\/position\/query ^GET url-and-header script-request-header http://192.168.10.19:5500/MyScripts/ApexHRTool/checkin.js
 
-^https:\/\/hrtool\.apexsoft\.com\.cn\/register\/attendance\/position\/query ^GET url-and-header script-request-header https://raw.githubusercontent.com/zw-95/QxScript/master/MyScripts/ApexHRTool/checkin.js
+^https:\/\/hrtool\.apexsoft\.com\.cn\/config ^GET url-and-header script-request-header https://raw.githubusercontent.com/zw-95/QxScript/master/MyScripts/ApexHRTool/checkin.js
 
 [task_local]
 8 38 * * * https://raw.githubusercontent.com/zw-95/QxScript/master/MyScripts/ApexHRTool/checkin.js, tag= 顶点HR小程序打卡，需获取cookie后手动执行, enabled=false
@@ -344,6 +344,7 @@ class UserInfo {
       return { 
         signInRecords,
         flowRecords,
+        leaveRecords,
         errorSignInRecords,
       }
     } catch (e) {

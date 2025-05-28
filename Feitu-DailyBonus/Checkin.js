@@ -30,7 +30,7 @@ const $ = new Env(`飞兔云`)
 let cookies = JSON.parse($.getdata('feitu_Cookies') || '[]') // 飞兔云Cookies，支持多个
 
 const barkKey = '' //Bark APP 通知推送Key
-
+var apihost ='gtm-1120.91tutu.xyz'
 $.Messages = []
 $.msgBody = ''
 
@@ -66,7 +66,7 @@ async function checkin(cookies) {
   for (let eachCK of cookies) {
     try {
       const checkinOptions = {
-        url: 'https://api-cdn.feitu.im/ft/gateway/cn/user/sign',
+        url: `https://${apihost}/ft/gateway/cn/user/sign`,
         headers: {
           Authorization: eachCK,
           'User-Agent':
@@ -74,7 +74,7 @@ async function checkin(cookies) {
         },
       }
       const getInfoOptions = {
-        url: 'https://api-cdn.feitu.im/ft/gateway/cn/user/getSubscribe',
+        url: `https://${apihost}/ft/gateway/cn/user/getSubscribe`,
         headers: {
           Authorization: eachCK,
           'User-Agent':
@@ -142,6 +142,7 @@ async function checkin(cookies) {
 
 async function GetCookie(oldCookie) {
   const req = JSON.stringify($request)
+  
   const newCookieValue = $request.headers['Authorization'] || $request.headers['authorization']
   $.log(`检测到飞兔云Cookie: ${newCookieValue}`)
 

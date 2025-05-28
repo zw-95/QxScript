@@ -354,7 +354,7 @@ try{
       "movie_info", // 优惠购票 景点宣传片
       "multi_page_anchor", // 二级导航菜单 门票 评论 推荐
       // "navbarMore", // 右上角三点
-      // "nearbyRecommendModule", // 周边推荐
+      "nearbyRecommendModule", // 周边推荐
       "nearby_house",
       "nearby_new_house_estate",
       "nearby_office_estate",
@@ -455,6 +455,7 @@ try{
       "kaMarketingCampaign", // 竞争营销，比如小米详情是apple店活动
       // "commonGoodsShelf", // 第三方团购商品列表，比如海底捞有抖音券的列表
       "kaProductMixServiceShelf", // 商品列表，例如大润发有饿了么的送货到家模块
+      "commonAiAgent", // 问ai，回答一点都不智能
     ];
     if (obj?.data?.modules) {
       for (let i of items) {
@@ -994,6 +995,14 @@ try{
       }
     }
     
+  } else if (url.includes("/ws/faas/amap-navigation/footprint")) {
+    // 更安全的写法：
+    const items = ["CommonFootprintBannerCard"];
+    if (Array.isArray(obj?.data?.town)) {
+      obj.data.town = obj.data.town.filter(v => 
+        v?.dataKey && !items.includes(v.dataKey)
+      );
+    }
   }
 } catch (error) {
   console.log("An error occurred:", error.name); // 错误名称
