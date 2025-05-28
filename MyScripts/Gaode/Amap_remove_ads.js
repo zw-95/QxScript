@@ -437,6 +437,7 @@ try{
       "waterFallFeedTitle", // 更多好去处标题
       "poiDetailWaterFeed", // 更多好去处
       "poiDetailWaterFeedTitle", // 地址详情最下面更多好去处标题
+      "shoppingMallEvent", // 逛街必看（商店活动，没啥用）
       "platformCustomerCommonModule", // 医疗添加的模块【可能需要的其他医疗服务】
       "platformCustomerComplianceInfo", // 本服务由高德精选商家提供 提示文字
       "similarShopRecommend", // 同类店铺推荐
