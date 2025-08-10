@@ -14,7 +14,7 @@ hostname = issks.com
 
 ==============================
 */
-$.Messages = []
+$.Messages = [];
 const url = $request.url;
 const $ = new Env('闪开来电去广告');
 if (!$response.body) $done({});
