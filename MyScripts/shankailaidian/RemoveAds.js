@@ -10,7 +10,7 @@
 ^https:\/\/wemp\.issks\.com\/charge\/v1\/popup\/outlet url script-response-body https://raw.githubusercontent.com/zw-95/QxScript/master/MyScripts/shankailaidian/RemoveAds.js
 
 [mitm]
-hostname = issks.com
+hostname = *.issks.com
 
 ==============================
 */
