@@ -26,6 +26,8 @@ if(body){
     if (body.data) {
       body.data.adopen = 0;
       body.data.itemAdvertises=[];
+      body.data.bannerAdvertises=[];
+      body.data.ad={};
     }
   }
   // 去除
