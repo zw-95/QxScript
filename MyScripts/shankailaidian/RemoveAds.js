@@ -12,10 +12,6 @@
 [mitm]
 hostname = issks.com
 
-
-HOST, qwapi.apple.com, REJECT
-HOST-SUFFIX, iad-apple.com, REJECT
-HOST-KEYWORD, iadsdk.apple.com, REJECT
 ==============================
 */
 $.Messages = []
