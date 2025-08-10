@@ -19,7 +19,6 @@ HOST-SUFFIX, iad-apple.com, REJECT
 HOST-KEYWORD, iadsdk.apple.com, REJECT
 ==============================
 */
-$.Messages = []
 const url = $request.url;
 const $ = new Env('XXX去广告');
 if (!$response.body) $done({});
