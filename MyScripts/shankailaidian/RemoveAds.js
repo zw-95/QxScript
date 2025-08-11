@@ -9,6 +9,8 @@
 
 ^https:\/\/wemp\.issks\.com\/charge\/v1\/popup\/outlet url script-response-body https://raw.githubusercontent.com/zw-95/QxScript/master/MyScripts/shankailaidian/RemoveAds.js
 
+^https:\/\/wemp\.issks\.com\/recharge\/v1\/recharge\/commonRecharge url script-response-body https://raw.githubusercontent.com/zw-95/QxScript/master/MyScripts/shankailaidian/RemoveAds.js
+
 [mitm]
 hostname = wemp.issks.com
 
@@ -34,6 +36,11 @@ if(body){
   if (url.includes("/charge/v1/popup/outlet")) {
     if (body.data) {
       body.data=[];
+    }
+  }
+  if (url.includes("/recharge/v1/recharge/commonRecharge")) {
+    if (body.data) {
+      body.data.rechargeOptionBanner={};
     }
   }
 
