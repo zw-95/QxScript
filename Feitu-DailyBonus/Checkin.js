@@ -21,7 +21,7 @@ QX 1.0.10+ :
 ^https:\/\/.+\.91tutu\.xyz\/ft\/gateway\/cn\/user\/getSubscribe ^GET url-and-header script-request-header https://raw.githubusercontent.com/zw-95/QxScript/master/Feitu-DailyBonus/Checkin.js
 
 [mitm]
-hostname = api-cdn.feitu.im,*.91tutu.xyz
+hostname = api-cdn.feitu.im,*.apitutu.com,*.91tutu.xyz
 ~~~~~~~~~~~~~~~~
 */
 
@@ -30,7 +30,7 @@ const $ = new Env(`飞兔云`)
 let cookies = JSON.parse($.getdata('feitu_Cookies') || '[]') // 飞兔云Cookies，支持多个
 
 const barkKey = '' //Bark APP 通知推送Key
-var apihost ='gtm-1120.91tutu.xyz'
+var apihost ='api-1029.apitutu.com'
 $.Messages = []
 $.msgBody = ''
 
