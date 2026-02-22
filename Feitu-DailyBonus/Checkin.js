@@ -31,7 +31,7 @@ const $ = new Env(`飞兔云`)
 let cookies = JSON.parse($.getdata('feitu_Cookies') || '[]') // 飞兔云Cookies，支持多个
 
 const barkKey = '' //Bark APP 通知推送Key
-var apihost ='api-1029.apitutu.com'
+var apihost ='api-1209.apitutu.com'
 $.Messages = []
 $.msgBody = ''
 
