@@ -19,6 +19,7 @@ QX 1.0.10+ :
 #飞兔云Cookie
 ^https:\/\/api-cdn.feitu.im\/ft\/gateway\/cn\/user\/getSubscribe ^GET url-and-header script-request-header https://raw.githubusercontent.com/zw-95/QxScript/master/Feitu-DailyBonus/Checkin.js
 ^https:\/\/.+\.91tutu\.xyz\/ft\/gateway\/cn\/user\/getSubscribe ^GET url-and-header script-request-header https://raw.githubusercontent.com/zw-95/QxScript/master/Feitu-DailyBonus/Checkin.js
+^https:\/\/.+\.apitutu\.com\/ft\/gateway\/cn\/user\/getSubscribe ^GET url-and-header script-request-header https://raw.githubusercontent.com/zw-95/QxScript/master/Feitu-DailyBonus/Checkin.js
 
 [mitm]
 hostname = api-cdn.feitu.im,*.apitutu.com,*.91tutu.xyz
