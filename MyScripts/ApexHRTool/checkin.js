@@ -115,10 +115,11 @@ async function main() {
 }
 
 class UserInfo {
-  constructor(str, userStr) {
+  constructor(str, userStr, xAuthTokenStr) {
     this.index = ++userIdx
     this.cookie = str
     this.user = userStr
+    this.xAuthToken = xAuthTokenStr
     this.logStat = false // 是否正常填写日志
     this.checkStat = false // 是否可以正常打卡
     this.posiStat = false // 定位状态
@@ -130,8 +131,7 @@ class UserInfo {
     this.signRandomPosiLat = 0 // 签到随机经度
     this.signRandomPosiLon = 0 // 签到随机维度
     this.headers = {
-      'User-Agent':
-        'Mozilla/5.0 (iPhone; CPU iPhone OS 16_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 MicroMessenger/8.0.48(0x18003013) NetType/4G Language/zh_CN',
+      'User-Agent': userAgent,
       Cookie: this.cookie,
       'x-auth-user': this.user,
       'x-auth-token': this.xAuthToken,
@@ -479,19 +479,8 @@ async function getCookie() {
 
 //检查变量 将cookie放到UserInfo对象中，构造对象到userList
 async function checkEnv() {
-  if (userCookie && xAuthUser) {
-    let e = envSplitor[0]
-    for (let o of envSplitor){
-      if (userCookie.indexOf(o) > -1) {
-        e = o
-        break
-      }
-    }
-    var cookies = userCookie.split(e)
-    for (let n of cookies) {
-      var user = xAuthUser.split(e)[cookies.indexOf(n)]
-      n && user && userList.push(new UserInfo(n, parseInt(user)))
-    }
+  if (userCookie && xAuthUser && xAuthToken) {
+    userList.push(new UserInfo(userCookie, xAuthUser, xAuthToken))
     userCount = userList.length
   } else {
     console.log('未找到Cookie')
