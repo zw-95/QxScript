@@ -27,13 +27,16 @@ hostname = hrtool.apexsoft.com.cn
 const $ = new Env(`顶点HR`)
 const ckName = 'apex_hr_Cookies'
 const xAuthUserName = 'apex_hr_User'
+const xAuthTokenName = 'apex_hr_Token'
+const userAgentName = 'apex_hr_UserAgent'
 let pinPositionName = $.getdata('pinPositionName') || '招商证券-机构'
 let userCookie = $.getdata(ckName) ||''
 let xAuthUser = $.getdata(xAuthUserName)||''
+let xAuthToken = $.getdata(xAuthTokenName)||''
+let userAgent = $.getdata(userAgentName)||''
+
 const hrHost = 'hrtool.apexsoft.com.cn'
-const tencentMapHost = 'apis.map.qq.com'
-const tencentMapParam = 'VVVSTVFsb3RWbFpHTmxNdFRrbExUek10Tmt4V1RsWXRRMUZJVmxNdE0waEdSVkU9' // 暂时不知道从哪取的
-const barkKey = '' //Bark APP 通知推送Key
+const barkKey = '7mVXNf3ZNHxs2GbfmcBpT5' //Bark APP 通知推送Key
 let userIdx = 0
 let userList = []
 let userCount = 0
@@ -63,11 +66,11 @@ async function main() {
       pushMsg(`❌账号${user.user} >> 非打卡时间!`)
       return
     }
-    await user.checkLog()
+    /*await user.checkLog()
     if (!user.logStat) {
       pushMsg(`❌账号${user.user} >> 请填写日志后再打卡!`)
       return
-    }
+    }*/
     await user.checkSignRecord()
     if (!user.checkStat) {
       pushMsg(`❌账号${user.user} >> 校验签到记录失败!`)
@@ -131,6 +134,7 @@ class UserInfo {
         'Mozilla/5.0 (iPhone; CPU iPhone OS 16_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 MicroMessenger/8.0.48(0x18003013) NetType/4G Language/zh_CN',
       Cookie: this.cookie,
       'x-auth-user': this.user,
+      'x-auth-token': this.xAuthToken,
       // 'Content-Type': 'application/json'
     }
   }
@@ -196,7 +200,7 @@ class UserInfo {
       const toDay = formatTimestamp(now)
       const tomorrow = formatTimestamp(Math.floor(now + 24 * 60 * 60))
       const options = {
-        url: `https://${hrHost}/register/workAttendance/query?beginDate=${toDay}${encodeURI(
+        url: `https://${hrHost}workAttendance?beginDate=${toDay}${encodeURI(
           ' 03:00:00'
         )}&endDate=${tomorrow}${encodeURI(' 02:59:59')}&type=1`,
         //请求头, 所有接口通用
@@ -260,19 +264,24 @@ class UserInfo {
             return
           }
           const getPosiNameOptions = {
+            url: `https://${hrHost}/register/map/regeo`,
+            //请求头, 所有接口通用
+            headers: { ...this.headers, 'Content-Type': 'application/json' },
+            body: $.toStr({longitude:this.signRandomPosiLat,latitude:this.signRandomPosiLon}),
+          }
+          /*const getPosiNameOptions = {
             url: `https://${tencentMapHost}/ws/geocoder/v1/?location=${this.signRandomPosiLat},${
               this.signRandomPosiLon
             }&key=${atob(atob(tencentMapParam))}`,
             //请求头, 所有接口通用
             headers: this.headers,
-          }
+          }*/
           debug(getPosiNameOptions, `查询随机位置名称请求`)
-          let posiNameRes = await this.Request(getPosiNameOptions, 'get')
+          let posiNameRes = await this.Request(getPosiNameOptions, 'post')
           var posiNameBody = posiNameRes
           debug(posiNameRes, `查询随机位置名称结果`)
-          if (posiNameBody && posiNameBody.status === 0) {
-            // this.posiName = posiNameBody.result.formatted_addresses.standard_address || ''
-            this.posiName = posiNameBody.result.address || ''
+          if (posiNameBody && posiNameBody.code > 0) {
+            this.posiName = posiNameBody.addressName || '湖北省武汉市江夏区关东街道光谷大道42号中国特种飞行器研发中心'
             $.log(`签到地点名称：${this.posiName}`)
           }
           if (this.posiName == null || this.posiName == '') {
@@ -406,11 +415,16 @@ async function getCookie() {
   if ($request && $request.method != 'OPTIONS') {
     userCookie = $request.headers['Cookie'] || $request.headers['cookie']
     xAuthUser = $request.headers['x-auth-user'] || $request.headers['x-Auth-User']
-    if (userCookie && xAuthUser) {
+    xAuthToken = $request.headers['x-auth-token'] || $request.headers['x-Auth-Token']
+    userAgent = $request.headers['User-Agent'] || $request.headers['user-agent']
+    if (userCookie && xAuthUser && xAuthToken && userAgent) {
       $.setdata(userCookie, ckName)
       $.setdata(xAuthUser, xAuthUserName)
+      $.setdata(xAuthToken, xAuthTokenName)
+      $.setdata(userAgent, userAgentName)
+      
       pushMsg(`获取会话成功,请手动执行任务打卡`)
-      $.log(`会话参数:${xAuthUser},${userCookie}`)
+      $.log(`会话参数:x-auth-user:${xAuthUser},\nCookie:${userCookie},\nx-auth-token:${xAuthToken},\nUser-Agent:${userAgent}`)
       return true
     } else {
       pushMsg('获取 Cookie失败 ❌')
