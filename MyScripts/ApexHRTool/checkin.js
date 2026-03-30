@@ -200,7 +200,7 @@ class UserInfo {
       const toDay = formatTimestamp(now)
       const tomorrow = formatTimestamp(Math.floor(now + 24 * 60 * 60))
       const options = {
-        url: `https://${hrHost}workAttendance?beginDate=${toDay}${encodeURI(
+        url: `https://${hrHost}/workAttendance?beginDate=${toDay}${encodeURI(
           ' 03:00:00'
         )}&endDate=${tomorrow}${encodeURI(' 02:59:59')}&type=1`,
         //请求头, 所有接口通用
