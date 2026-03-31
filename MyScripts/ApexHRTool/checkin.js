@@ -366,7 +366,7 @@ class UserInfo {
     if ($.is_signIn !== 'true') {
       try {
         await $.wait(1000)
-        debug(res, '模拟签到动作延时1s')
+        debug("模拟打卡", '模拟签到动作延时1s')
         var body = { code: 1, note: `模拟打卡成功` }
         // var body = { code: -1, note: `调取打卡接口失败` }
         if (body) {
