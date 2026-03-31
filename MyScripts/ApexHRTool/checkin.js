@@ -255,9 +255,9 @@ class UserInfo {
         if (posi) {
           $.log(`签到公司名：${posi.note}`)
           // 获取该签到地点旁边的随机位置
-          var randomPosi = generateRandomCoordinates(parseFloat(posi.latitude), parseFloat(posi.longitude), distance)
-          this.signRandomPosiLat = randomPosi.latitude
-          this.signRandomPosiLon = randomPosi.longitude
+          var randomPosi = getNearbyPoint(parseFloat(posi.latitude), parseFloat(posi.longitude), distance)
+          this.signRandomPosiLat = randomPosi.lat
+          this.signRandomPosiLon = randomPosi.lon
           this.signCorpName = posi.note
           if (this.signCorpName == null || this.signCorpName == '') {
             pushMsg(`获取签到分公司名称失败！`)
@@ -269,19 +269,12 @@ class UserInfo {
             headers: { ...this.headers, 'Content-Type': 'application/json' },
             body: $.toStr({longitude:this.signRandomPosiLat,latitude:this.signRandomPosiLon}),
           }
-          /*const getPosiNameOptions = {
-            url: `https://${tencentMapHost}/ws/geocoder/v1/?location=${this.signRandomPosiLat},${
-              this.signRandomPosiLon
-            }&key=${atob(atob(tencentMapParam))}`,
-            //请求头, 所有接口通用
-            headers: this.headers,
-          }*/
           debug(getPosiNameOptions, `查询随机位置名称请求`)
           let posiNameRes = await this.Request(getPosiNameOptions, 'post')
           var posiNameBody = posiNameRes
           debug(posiNameRes, `查询随机位置名称结果`)
           if (posiNameBody && posiNameBody.code > 0) {
-            this.posiName = posiNameBody.addressName || '湖北省武汉市江夏区关东街道光谷大道42号中国特种飞行器研发中心'
+            this.posiName = posiNameBody.addressName || ('湖北省武汉市江夏区关东街道光谷大道42号中国特种飞行器研发中心东南约' + (Math.floor(Math.random() * (10 - 3 + 1)) + 3) *10  + '米')
             $.log(`签到地点名称：${this.posiName}`)
           }
           if (this.posiName == null || this.posiName == '') {
@@ -546,34 +539,48 @@ function generateRandomLongitude(minLon, maxLon) {
   return Math.random() * (maxLon - minLon) + minLon
 }
 
-// 生成一个随机的经纬度坐标点
-function generateRandomCoordinates(lat, lon, distance) {
-  var earthRadius = 6371e3 // 地球半径，单位：米
-  var maxLatitude = lat + ((distance / earthRadius) * 180) / Math.PI
-  var minLatitude = lat - ((distance / earthRadius) * 180) / Math.PI
-  var deltaLon = ((distance / earthRadius) * 360) / Math.PI
-
-  // 计算经度的最小值和最大值
-  var minLon = lon - deltaLon
-  var maxLon = lon + deltaLon
-
-  // 处理经度的越界问题
-  if (maxLon > 180) {
-    maxLon -= 360
-    minLon -= 360
-  } else if (minLon < -180) {
-    maxLon += 360
-    minLon += 360
-  }
-
-  // 生成随机的纬度和经度
-  var randomLatitude = generateRandomLatitude(minLatitude, maxLatitude).toFixed(14)
-  var randomLongitude = generateRandomLongitude(minLon, maxLon).toFixed(14)
-
-  return {
-    latitude: Number(randomLatitude),
-    longitude: Number(randomLongitude),
-  }
+/**
+* 生成给定经纬度附近指定米内的随机点（14位小数精度）
+* @param {number} lat - 纬度 (-90 to 90)
+* @param {number} lon - 经度 (-180 to 180)
+* @returns {Object} 包含随机经纬度的对象 {lat, lon}
+*/
+function getNearbyPoint(lat, lon, distance) {
+    const EARTH_RADIUS = 6371000; // 地球半径（米）
+    
+    // 1. 计算150米对应的纬度差（南北方向，固定值）
+    // 1度纬度 ≈ 111319.49079327357米
+    const metersPerLatDegree = (Math.PI / 180) * EARTH_RADIUS;
+    const maxLatDiff = distance / metersPerLatDegree; // ≈ 0.00134898240888度
+    
+    // 2. 计算150米对应的经度差（东西方向，随纬度变化）
+    const latRad = (lat * Math.PI) / 180;
+    const cosLat = Math.cos(latRad);
+    
+    // 防止除零（极点处cos为0）
+    const safeCosLat = Math.max(cosLat, 0.0001);
+    const maxLonDiff = maxLatDiff / safeCosLat;
+    
+    // 3. 生成随机偏移量（圆形均匀分布）
+    const angle = Math.random() * 2 * Math.PI;
+    const radius = Math.sqrt(Math.random());
+    
+    const latOffset = maxLatDiff * radius * Math.sin(angle);
+    const lonOffset = maxLonDiff * radius * Math.cos(angle);
+    
+    // 4. 计算新坐标
+    let newLat = lat + latOffset;
+    let newLon = lon + lonOffset;
+    
+    // 5. 边界处理
+    newLat = Math.max(-90, Math.min(90, newLat));
+    newLon = ((newLon + 180) % 360) - 180;
+    
+    // 6. 返回14位小数精度
+    return {
+        lat: Number(newLat.toFixed(14)),
+        lon: Number(newLon.toFixed(14))
+    };
 }
 
 // 格式化时间戳为日期

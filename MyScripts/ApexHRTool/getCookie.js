@@ -29,7 +29,7 @@ const ckName = 'apex_hr_Cookies'
 const xAuthUserName = 'apex_hr_User'
 const xAuthTokenName = 'apex_hr_Token'
 const userAgentName = 'apex_hr_UserAgent'
-const barkKey = '7mVXNf3ZNHxs2GbfmcBpT5' //Bark APP 通知推送Key
+const barkKey = '' //Bark APP 通知推送Key
 
 $.Messages = []
 //调试
