@@ -30,10 +30,10 @@ const xAuthUserName = 'apex_hr_User'
 const xAuthTokenName = 'apex_hr_Token'
 const userAgentName = 'apex_hr_UserAgent'
 let pinPositionName = $.getdata('pinPositionName') || '招商证券-机构'
-let userCookie = $.getdata(ckName) ||''
-let xAuthUser = $.getdata(xAuthUserName)||''
-let xAuthToken = $.getdata(xAuthTokenName)||''
-let userAgent = $.getdata(userAgentName)||''
+let userCookie = $.getdata(ckName) || ''
+let xAuthUser = $.getdata(xAuthUserName) || ''
+let xAuthToken = $.getdata(xAuthTokenName) || ''
+let userAgent = $.getdata(userAgentName) || ''
 
 const hrHost = 'hrtool.apexsoft.com.cn'
 const barkKey = '7mVXNf3ZNHxs2GbfmcBpT5' //Bark APP 通知推送Key
@@ -95,14 +95,14 @@ async function main() {
 
     // 查询当月考勤情况
     let signSituation = await user.getCmthErrorCount()
-    if(signSituation){
+    if (signSituation) {
       if (signSituation.flowRecords.length > 0) {
         pushMsg(`本月考勤异常 ${signSituation.flowRecords.length} 天`)
       }
       if (signSituation.leaveRecords.length > 0) {
         pushMsg(`本月请假 ${signSituation.leaveRecords.length} 天`)
       }
-      if(signSituation.errorSignInRecords.length > 0){
+      if (signSituation.errorSignInRecords.length > 0) {
         pushMsg(`❗本月缺勤 ${signSituation.errorSignInRecords.length} 天，请及时处理`)
         pushMsg(signSituation.errorSignInRecords.map((v) => `${v.f2} ${v.f6CN}`).join('\n'))
       }
@@ -267,14 +267,18 @@ class UserInfo {
             url: `https://${hrHost}/register/map/regeo`,
             //请求头, 所有接口通用
             headers: { ...this.headers, 'Content-Type': 'application/json' },
-            body: $.toStr({longitude:this.signRandomPosiLat,latitude:this.signRandomPosiLon}),
+            body: $.toStr({ longitude: this.signRandomPosiLon, latitude: this.signRandomPosiLat }),
           }
           debug(getPosiNameOptions, `查询随机位置名称请求`)
           let posiNameRes = await this.Request(getPosiNameOptions, 'post')
           var posiNameBody = posiNameRes
           debug(posiNameRes, `查询随机位置名称结果`)
           if (posiNameBody && posiNameBody.code > 0) {
-            this.posiName = posiNameBody.addressName || ('湖北省武汉市江夏区关东街道光谷大道42号中国特种飞行器研发中心东南约' + (Math.floor(Math.random() * (10 - 3 + 1)) + 3) *10  + '米')
+            this.posiName =
+              posiNameBody.addressName ||
+              '湖北省武汉市江夏区关东街道光谷大道42号中国特种飞行器研发中心东南约' +
+                (Math.floor(Math.random() * (10 - 3 + 1)) + 3) * 10 +
+                '米'
             $.log(`签到地点名称：${this.posiName}`)
           }
           if (this.posiName == null || this.posiName == '') {
@@ -315,13 +319,13 @@ class UserInfo {
   //查询本月签到记录，查出不正常的天数（不包括今天）
   async getCmthErrorCount() {
     try {
-      var now = new Date();
-      var year = now.getUTCFullYear();
-      var month = now.getUTCMonth();
+      var now = new Date()
+      var year = now.getUTCFullYear()
+      var month = now.getUTCMonth()
       // 计算当月第一天（UTC时间）
-      var mthBegin = formatTimestamp(Date.UTC(year, month, 1) / 1000);
+      var mthBegin = formatTimestamp(Date.UTC(year, month, 1) / 1000)
       // 计算次月第一天（UTC时间）
-      var mthEnd = formatTimestamp(Date.UTC(year, month + 1, 1) / 1000);
+      var mthEnd = formatTimestamp(Date.UTC(year, month + 1, 1) / 1000)
       const options = {
         url: `https://${hrHost}/register/attendance/t98/query?beginDate=${mthBegin}&endDate=${mthEnd}&pageSize=35&pageNum=1`,
         headers: this.headers,
@@ -333,17 +337,20 @@ class UserInfo {
       if (body) {
         if (body.code == 1) {
           // 正常打卡天数
-          var signInRecords = body.records.filter((v) => ['正常上下班'].includes(v.f6CN));
+          var signInRecords = body.records.filter((v) => ['正常上下班'].includes(v.f6CN))
           // 考勤异常天数
-          var flowRecords = body.records.filter((v) => ['考勤异常'].includes(v.f6CN));
+          var flowRecords = body.records.filter((v) => ['考勤异常'].includes(v.f6CN))
           // 请假天数
-          var leaveRecords = body.records.filter((v) => ['休假'].includes(v.f6CN));
+          var leaveRecords = body.records.filter((v) => ['休假'].includes(v.f6CN))
           // 未处理的缺勤，不包括今天
-          var errorSignInRecords = body.records.filter((v) => ![...signInRecords, ...flowRecords, ...leaveRecords].includes(v) && v.f2 != formatTimestamp(now.getTime() / 1000));
-
+          var errorSignInRecords = body.records.filter(
+            (v) =>
+              ![...signInRecords, ...flowRecords, ...leaveRecords].includes(v) &&
+              v.f2 != formatTimestamp(now.getTime() / 1000)
+          )
         }
       }
-      return { 
+      return {
         signInRecords,
         flowRecords,
         leaveRecords,
@@ -415,9 +422,11 @@ async function getCookie() {
       $.setdata(xAuthUser, xAuthUserName)
       $.setdata(xAuthToken, xAuthTokenName)
       $.setdata(userAgent, userAgentName)
-      
+
       pushMsg(`获取会话成功,请手动执行任务打卡`)
-      $.log(`会话参数:x-auth-user:${xAuthUser},\nCookie:${userCookie},\nx-auth-token:${xAuthToken},\nUser-Agent:${userAgent}`)
+      $.log(
+        `会话参数:x-auth-user:${xAuthUser},\nCookie:${userCookie},\nx-auth-token:${xAuthToken},\nUser-Agent:${userAgent}`
+      )
       return true
     } else {
       pushMsg('获取 Cookie失败 ❌')
@@ -482,7 +491,6 @@ async function checkEnv() {
   return console.log(`共找到${userCount}个账号`), true //true == !0
 }
 
-
 // ==================================== 通用函数 ====================================
 // DEBUG
 function debug(text, title = 'debug') {
@@ -498,7 +506,7 @@ function debug(text, title = 'debug') {
     }
   }
 }
-function pushMsg(text){
+function pushMsg(text) {
   $.Messages.push(text)
   $.log(`通知内容：${text}`)
 }
@@ -540,56 +548,56 @@ function generateRandomLongitude(minLon, maxLon) {
 }
 
 /**
-* 生成给定经纬度附近指定米内的随机点（14位小数精度）
-* @param {number} lat - 纬度 (-90 to 90)
-* @param {number} lon - 经度 (-180 to 180)
-* @returns {Object} 包含随机经纬度的对象 {lat, lon}
-*/
+ * 生成给定经纬度附近指定米内的随机点（14位小数精度）
+ * @param {number} lat - 纬度 (-90 to 90)
+ * @param {number} lon - 经度 (-180 to 180)
+ * @returns {Object} 包含随机经纬度的对象 {lat, lon}
+ */
 function getNearbyPoint(lat, lon, distance) {
-    const EARTH_RADIUS = 6371000; // 地球半径（米）
-    
-    // 1. 计算150米对应的纬度差（南北方向，固定值）
-    // 1度纬度 ≈ 111319.49079327357米
-    const metersPerLatDegree = (Math.PI / 180) * EARTH_RADIUS;
-    const maxLatDiff = distance / metersPerLatDegree; // ≈ 0.00134898240888度
-    
-    // 2. 计算150米对应的经度差（东西方向，随纬度变化）
-    const latRad = (lat * Math.PI) / 180;
-    const cosLat = Math.cos(latRad);
-    
-    // 防止除零（极点处cos为0）
-    const safeCosLat = Math.max(cosLat, 0.0001);
-    const maxLonDiff = maxLatDiff / safeCosLat;
-    
-    // 3. 生成随机偏移量（圆形均匀分布）
-    const angle = Math.random() * 2 * Math.PI;
-    const radius = Math.sqrt(Math.random());
-    
-    const latOffset = maxLatDiff * radius * Math.sin(angle);
-    const lonOffset = maxLonDiff * radius * Math.cos(angle);
-    
-    // 4. 计算新坐标
-    let newLat = lat + latOffset;
-    let newLon = lon + lonOffset;
-    
-    // 5. 边界处理
-    newLat = Math.max(-90, Math.min(90, newLat));
-    newLon = ((newLon + 180) % 360) - 180;
-    
-    // 6. 返回14位小数精度
-    return {
-        lat: Number(newLat.toFixed(14)),
-        lon: Number(newLon.toFixed(14))
-    };
+  const EARTH_RADIUS = 6371000 // 地球半径（米）
+
+  // 1. 计算150米对应的纬度差（南北方向，固定值）
+  // 1度纬度 ≈ 111319.49079327357米
+  const metersPerLatDegree = (Math.PI / 180) * EARTH_RADIUS
+  const maxLatDiff = distance / metersPerLatDegree // ≈ 0.00134898240888度
+
+  // 2. 计算150米对应的经度差（东西方向，随纬度变化）
+  const latRad = (lat * Math.PI) / 180
+  const cosLat = Math.cos(latRad)
+
+  // 防止除零（极点处cos为0）
+  const safeCosLat = Math.max(cosLat, 0.0001)
+  const maxLonDiff = maxLatDiff / safeCosLat
+
+  // 3. 生成随机偏移量（圆形均匀分布）
+  const angle = Math.random() * 2 * Math.PI
+  const radius = Math.sqrt(Math.random())
+
+  const latOffset = maxLatDiff * radius * Math.sin(angle)
+  const lonOffset = maxLonDiff * radius * Math.cos(angle)
+
+  // 4. 计算新坐标
+  let newLat = lat + latOffset
+  let newLon = lon + lonOffset
+
+  // 5. 边界处理
+  newLat = Math.max(-90, Math.min(90, newLat))
+  newLon = ((newLon + 180) % 360) - 180
+
+  // 6. 返回14位小数精度
+  return {
+    lat: Number(newLat.toFixed(14)),
+    lon: Number(newLon.toFixed(14)),
+  }
 }
 
 // 格式化时间戳为日期
 function formatTimestamp(timestampInSeconds) {
   var date = new Date(timestampInSeconds * 1000)
-  var year = date.getUTCFullYear();
-  var month = date.getUTCMonth() + 1;
-  var day = date.getUTCDate();
-  return year + '-' + month.toString().padStart(2, '0') + '-' + day.toString().padStart(2, '0');
+  var year = date.getUTCFullYear()
+  var month = date.getUTCMonth() + 1
+  var day = date.getUTCDate()
+  return year + '-' + month.toString().padStart(2, '0') + '-' + day.toString().padStart(2, '0')
 }
 //随机整数生成
 function randomInt(min, max) {
@@ -619,5 +627,354 @@ async function BarkNotify(c, k, t, b) {
 }
 
 // https://github.com/chavyleung/scripts/blob/master/Env.min.js
-function Env(t, e) { class s { constructor(t) { this.env = t } send(t, e = "GET") { t = "string" == typeof t ? { url: t } : t; let s = this.get; return "POST" === e && (s = this.post), new Promise((e, i) => { s.call(this, t, (t, s, r) => { t ? i(t) : e(s) }) }) } get(t) { return this.send.call(this.env, t) } post(t) { return this.send.call(this.env, t, "POST") } } return new class { constructor(t, e) { this.name = t, this.http = new s(this), this.data = null, this.dataFile = "box.dat", this.logs = [], this.isMute = !1, this.isNeedRewrite = !1, this.logSeparator = "\n", this.startTime = (new Date).getTime(), Object.assign(this, e), this.log("", `\ud83d\udd14${this.name}, \u5f00\u59cb!`) } isNode() { return "undefined" != typeof module && !!module.exports } isQuanX() { return "undefined" != typeof $task } isSurge() { return "undefined" != typeof $httpClient && "undefined" == typeof $loon } isLoon() { return "undefined" != typeof $loon } toObj(t, e = null) { try { return JSON.parse(t) } catch { return e } } toStr(t, e = null) { try { return JSON.stringify(t) } catch { return e } } getjson(t, e) { let s = e; const i = this.getdata(t); if (i) try { s = JSON.parse(this.getdata(t)) } catch { } return s } setjson(t, e) { try { return this.setdata(JSON.stringify(t), e) } catch { return !1 } } getScript(t) { return new Promise(e => { this.get({ url: t }, (t, s, i) => e(i)) }) } runScript(t, e) { return new Promise(s => { let i = this.getdata("@chavy_boxjs_userCfgs.httpapi"); i = i ? i.replace(/\n/g, "").trim() : i; let r = this.getdata("@chavy_boxjs_userCfgs.httpapi_timeout"); r = r ? 1 * r : 20, r = e && e.timeout ? e.timeout : r; const [o, h] = i.split("@"), a = { url: `http://${h}/v1/scripting/evaluate`, body: { script_text: t, mock_type: "cron", timeout: r }, headers: { "X-Key": o, Accept: "*/*" } }; this.post(a, (t, e, i) => s(i)) }).catch(t => this.logErr(t)) } loaddata() { if (!this.isNode()) return {}; { this.fs = this.fs ? this.fs : require("fs"), this.path = this.path ? this.path : require("path"); const t = this.path.resolve(this.dataFile), e = this.path.resolve(process.cwd(), this.dataFile), s = this.fs.existsSync(t), i = !s && this.fs.existsSync(e); if (!s && !i) return {}; { const i = s ? t : e; try { return JSON.parse(this.fs.readFileSync(i)) } catch (t) { return {} } } } } writedata() { if (this.isNode()) { this.fs = this.fs ? this.fs : require("fs"), this.path = this.path ? this.path : require("path"); const t = this.path.resolve(this.dataFile), e = this.path.resolve(process.cwd(), this.dataFile), s = this.fs.existsSync(t), i = !s && this.fs.existsSync(e), r = JSON.stringify(this.data); s ? this.fs.writeFileSync(t, r) : i ? this.fs.writeFileSync(e, r) : this.fs.writeFileSync(t, r) } } lodash_get(t, e, s) { const i = e.replace(/\[(\d+)\]/g, ".$1").split("."); let r = t; for (const t of i) if (r = Object(r)[t], void 0 === r) return s; return r } lodash_set(t, e, s) { return Object(t) !== t ? t : (Array.isArray(e) || (e = e.toString().match(/[^.[\]]+/g) || []), e.slice(0, -1).reduce((t, s, i) => Object(t[s]) === t[s] ? t[s] : t[s] = Math.abs(e[i + 1]) >> 0 == +e[i + 1] ? [] : {}, t)[e[e.length - 1]] = s, t) } getdata(t) { let e = this.getval(t); if (/^@/.test(t)) { const [, s, i] = /^@(.*?)\.(.*?)$/.exec(t), r = s ? this.getval(s) : ""; if (r) try { const t = JSON.parse(r); e = t ? this.lodash_get(t, i, "") : e } catch (t) { e = "" } } return e } setdata(t, e) { let s = !1; if (/^@/.test(e)) { const [, i, r] = /^@(.*?)\.(.*?)$/.exec(e), o = this.getval(i), h = i ? "null" === o ? null : o || "{}" : "{}"; try { const e = JSON.parse(h); this.lodash_set(e, r, t), s = this.setval(JSON.stringify(e), i) } catch (e) { const o = {}; this.lodash_set(o, r, t), s = this.setval(JSON.stringify(o), i) } } else s = this.setval(t, e); return s } getval(t) { return this.isSurge() || this.isLoon() ? $persistentStore.read(t) : this.isQuanX() ? $prefs.valueForKey(t) : this.isNode() ? (this.data = this.loaddata(), this.data[t]) : this.data && this.data[t] || null } setval(t, e) { return this.isSurge() || this.isLoon() ? $persistentStore.write(t, e) : this.isQuanX() ? $prefs.setValueForKey(t, e) : this.isNode() ? (this.data = this.loaddata(), this.data[e] = t, this.writedata(), !0) : this.data && this.data[e] || null } initGotEnv(t) { this.got = this.got ? this.got : require("got"), this.cktough = this.cktough ? this.cktough : require("tough-cookie"), this.ckjar = this.ckjar ? this.ckjar : new this.cktough.CookieJar, t && (t.headers = t.headers ? t.headers : {}, void 0 === t.headers.Cookie && void 0 === t.cookieJar && (t.cookieJar = this.ckjar)) } get(t, e = (() => { })) { t.headers && (delete t.headers["Content-Type"], delete t.headers["Content-Length"]), this.isSurge() || this.isLoon() ? (this.isSurge() && this.isNeedRewrite && (t.headers = t.headers || {}, Object.assign(t.headers, { "X-Surge-Skip-Scripting": !1 })), $httpClient.get(t, (t, s, i) => { !t && s && (s.body = i, s.statusCode = s.status), e(t, s, i) })) : this.isQuanX() ? (this.isNeedRewrite && (t.opts = t.opts || {}, Object.assign(t.opts, { hints: !1 })), $task.fetch(t).then(t => { const { statusCode: s, statusCode: i, headers: r, body: o } = t; e(null, { status: s, statusCode: i, headers: r, body: o }, o) }, t => e(t))) : this.isNode() && (this.initGotEnv(t), this.got(t).on("redirect", (t, e) => { try { if (t.headers["set-cookie"]) { const s = t.headers["set-cookie"].map(this.cktough.Cookie.parse).toString(); this.ckjar.setCookieSync(s, null), e.cookieJar = this.ckjar } } catch (t) { this.logErr(t) } }).then(t => { const { statusCode: s, statusCode: i, headers: r, body: o } = t; e(null, { status: s, statusCode: i, headers: r, body: o }, o) }, t => { const { message: s, response: i } = t; e(s, i, i && i.body) })) } post(t, e = (() => { })) { if (t.body && t.headers && !t.headers["Content-Type"] && (t.headers["Content-Type"] = "application/x-www-form-urlencoded"), t.headers && delete t.headers["Content-Length"], this.isSurge() || this.isLoon()) this.isSurge() && this.isNeedRewrite && (t.headers = t.headers || {}, Object.assign(t.headers, { "X-Surge-Skip-Scripting": !1 })), $httpClient.post(t, (t, s, i) => { !t && s && (s.body = i, s.statusCode = s.status), e(t, s, i) }); else if (this.isQuanX()) t.method = "POST", this.isNeedRewrite && (t.opts = t.opts || {}, Object.assign(t.opts, { hints: !1 })), $task.fetch(t).then(t => { const { statusCode: s, statusCode: i, headers: r, body: o } = t; e(null, { status: s, statusCode: i, headers: r, body: o }, o) }, t => e(t)); else if (this.isNode()) { this.initGotEnv(t); const { url: s, ...i } = t; this.got.post(s, i).then(t => { const { statusCode: s, statusCode: i, headers: r, body: o } = t; e(null, { status: s, statusCode: i, headers: r, body: o }, o) }, t => { const { message: s, response: i } = t; e(s, i, i && i.body) }) } } time(t) { let e = { "M+": (new Date).getMonth() + 1, "d+": (new Date).getDate(), "H+": (new Date).getHours(), "m+": (new Date).getMinutes(), "s+": (new Date).getSeconds(), "q+": Math.floor(((new Date).getMonth() + 3) / 3), S: (new Date).getMilliseconds() }; /(y+)/.test(t) && (t = t.replace(RegExp.$1, ((new Date).getFullYear() + "").substr(4 - RegExp.$1.length))); for (let s in e) new RegExp("(" + s + ")").test(t) && (t = t.replace(RegExp.$1, 1 == RegExp.$1.length ? e[s] : ("00" + e[s]).substr(("" + e[s]).length))); return t } msg(e = t, s = "", i = "", r) { const o = t => { if (!t) return t; if ("string" == typeof t) return this.isLoon() ? t : this.isQuanX() ? { "open-url": t } : this.isSurge() ? { url: t } : void 0; if ("object" == typeof t) { if (this.isLoon()) { let e = t.openUrl || t.url || t["open-url"], s = t.mediaUrl || t["media-url"]; return { openUrl: e, mediaUrl: s } } if (this.isQuanX()) { let e = t["open-url"] || t.url || t.openUrl, s = t["media-url"] || t.mediaUrl; return { "open-url": e, "media-url": s } } if (this.isSurge()) { let e = t.url || t.openUrl || t["open-url"]; return { url: e } } } }; this.isMute || (this.isSurge() || this.isLoon() ? $notification.post(e, s, i, o(r)) : this.isQuanX() && $notify(e, s, i, o(r))); let h = ["", "==============\ud83d\udce3\u7cfb\u7edf\u901a\u77e5\ud83d\udce3=============="]; h.push(e), s && h.push(s), i && h.push(i), console.log(h.join("\n")), this.logs = this.logs.concat(h) } log(...t) { t.length > 0 && (this.logs = [...this.logs, ...t]), console.log(t.join(this.logSeparator)) } logErr(t, e) { const s = !this.isSurge() && !this.isQuanX() && !this.isLoon(); s ? this.log("", `\u2757\ufe0f${this.name}, \u9519\u8bef!`, t.stack) : this.log("", `\u2757\ufe0f${this.name}, \u9519\u8bef!`, t) } wait(t) { return new Promise(e => setTimeout(e, t)) } done(t = {}) { const e = (new Date).getTime(), s = (e - this.startTime) / 1e3; this.log("", `\ud83d\udd14${this.name}, \u7ed3\u675f! \ud83d\udd5b ${s} \u79d2`), this.log(), (this.isSurge() || this.isQuanX() || this.isLoon()) && $done(t) } }(t, e) }
-
+function Env(t, e) {
+  class s {
+    constructor(t) {
+      this.env = t
+    }
+    send(t, e = 'GET') {
+      t = 'string' == typeof t ? { url: t } : t
+      let s = this.get
+      return (
+        'POST' === e && (s = this.post),
+        new Promise((e, i) => {
+          s.call(this, t, (t, s, r) => {
+            t ? i(t) : e(s)
+          })
+        })
+      )
+    }
+    get(t) {
+      return this.send.call(this.env, t)
+    }
+    post(t) {
+      return this.send.call(this.env, t, 'POST')
+    }
+  }
+  return new (class {
+    constructor(t, e) {
+      ;(this.name = t),
+        (this.http = new s(this)),
+        (this.data = null),
+        (this.dataFile = 'box.dat'),
+        (this.logs = []),
+        (this.isMute = !1),
+        (this.isNeedRewrite = !1),
+        (this.logSeparator = '\n'),
+        (this.startTime = new Date().getTime()),
+        Object.assign(this, e),
+        this.log('', `\ud83d\udd14${this.name}, \u5f00\u59cb!`)
+    }
+    isNode() {
+      return 'undefined' != typeof module && !!module.exports
+    }
+    isQuanX() {
+      return 'undefined' != typeof $task
+    }
+    isSurge() {
+      return 'undefined' != typeof $httpClient && 'undefined' == typeof $loon
+    }
+    isLoon() {
+      return 'undefined' != typeof $loon
+    }
+    toObj(t, e = null) {
+      try {
+        return JSON.parse(t)
+      } catch {
+        return e
+      }
+    }
+    toStr(t, e = null) {
+      try {
+        return JSON.stringify(t)
+      } catch {
+        return e
+      }
+    }
+    getjson(t, e) {
+      let s = e
+      const i = this.getdata(t)
+      if (i)
+        try {
+          s = JSON.parse(this.getdata(t))
+        } catch {}
+      return s
+    }
+    setjson(t, e) {
+      try {
+        return this.setdata(JSON.stringify(t), e)
+      } catch {
+        return !1
+      }
+    }
+    getScript(t) {
+      return new Promise((e) => {
+        this.get({ url: t }, (t, s, i) => e(i))
+      })
+    }
+    runScript(t, e) {
+      return new Promise((s) => {
+        let i = this.getdata('@chavy_boxjs_userCfgs.httpapi')
+        i = i ? i.replace(/\n/g, '').trim() : i
+        let r = this.getdata('@chavy_boxjs_userCfgs.httpapi_timeout')
+        ;(r = r ? 1 * r : 20), (r = e && e.timeout ? e.timeout : r)
+        const [o, h] = i.split('@'),
+          a = {
+            url: `http://${h}/v1/scripting/evaluate`,
+            body: { script_text: t, mock_type: 'cron', timeout: r },
+            headers: { 'X-Key': o, Accept: '*/*' },
+          }
+        this.post(a, (t, e, i) => s(i))
+      }).catch((t) => this.logErr(t))
+    }
+    loaddata() {
+      if (!this.isNode()) return {}
+      {
+        ;(this.fs = this.fs ? this.fs : require('fs')), (this.path = this.path ? this.path : require('path'))
+        const t = this.path.resolve(this.dataFile),
+          e = this.path.resolve(process.cwd(), this.dataFile),
+          s = this.fs.existsSync(t),
+          i = !s && this.fs.existsSync(e)
+        if (!s && !i) return {}
+        {
+          const i = s ? t : e
+          try {
+            return JSON.parse(this.fs.readFileSync(i))
+          } catch (t) {
+            return {}
+          }
+        }
+      }
+    }
+    writedata() {
+      if (this.isNode()) {
+        ;(this.fs = this.fs ? this.fs : require('fs')), (this.path = this.path ? this.path : require('path'))
+        const t = this.path.resolve(this.dataFile),
+          e = this.path.resolve(process.cwd(), this.dataFile),
+          s = this.fs.existsSync(t),
+          i = !s && this.fs.existsSync(e),
+          r = JSON.stringify(this.data)
+        s ? this.fs.writeFileSync(t, r) : i ? this.fs.writeFileSync(e, r) : this.fs.writeFileSync(t, r)
+      }
+    }
+    lodash_get(t, e, s) {
+      const i = e.replace(/\[(\d+)\]/g, '.$1').split('.')
+      let r = t
+      for (const t of i) if (((r = Object(r)[t]), void 0 === r)) return s
+      return r
+    }
+    lodash_set(t, e, s) {
+      return Object(t) !== t
+        ? t
+        : (Array.isArray(e) || (e = e.toString().match(/[^.[\]]+/g) || []),
+          (e
+            .slice(0, -1)
+            .reduce(
+              (t, s, i) => (Object(t[s]) === t[s] ? t[s] : (t[s] = Math.abs(e[i + 1]) >> 0 == +e[i + 1] ? [] : {})),
+              t
+            )[e[e.length - 1]] = s),
+          t)
+    }
+    getdata(t) {
+      let e = this.getval(t)
+      if (/^@/.test(t)) {
+        const [, s, i] = /^@(.*?)\.(.*?)$/.exec(t),
+          r = s ? this.getval(s) : ''
+        if (r)
+          try {
+            const t = JSON.parse(r)
+            e = t ? this.lodash_get(t, i, '') : e
+          } catch (t) {
+            e = ''
+          }
+      }
+      return e
+    }
+    setdata(t, e) {
+      let s = !1
+      if (/^@/.test(e)) {
+        const [, i, r] = /^@(.*?)\.(.*?)$/.exec(e),
+          o = this.getval(i),
+          h = i ? ('null' === o ? null : o || '{}') : '{}'
+        try {
+          const e = JSON.parse(h)
+          this.lodash_set(e, r, t), (s = this.setval(JSON.stringify(e), i))
+        } catch (e) {
+          const o = {}
+          this.lodash_set(o, r, t), (s = this.setval(JSON.stringify(o), i))
+        }
+      } else s = this.setval(t, e)
+      return s
+    }
+    getval(t) {
+      return this.isSurge() || this.isLoon()
+        ? $persistentStore.read(t)
+        : this.isQuanX()
+        ? $prefs.valueForKey(t)
+        : this.isNode()
+        ? ((this.data = this.loaddata()), this.data[t])
+        : (this.data && this.data[t]) || null
+    }
+    setval(t, e) {
+      return this.isSurge() || this.isLoon()
+        ? $persistentStore.write(t, e)
+        : this.isQuanX()
+        ? $prefs.setValueForKey(t, e)
+        : this.isNode()
+        ? ((this.data = this.loaddata()), (this.data[e] = t), this.writedata(), !0)
+        : (this.data && this.data[e]) || null
+    }
+    initGotEnv(t) {
+      ;(this.got = this.got ? this.got : require('got')),
+        (this.cktough = this.cktough ? this.cktough : require('tough-cookie')),
+        (this.ckjar = this.ckjar ? this.ckjar : new this.cktough.CookieJar()),
+        t &&
+          ((t.headers = t.headers ? t.headers : {}),
+          void 0 === t.headers.Cookie && void 0 === t.cookieJar && (t.cookieJar = this.ckjar))
+    }
+    get(t, e = () => {}) {
+      t.headers && (delete t.headers['Content-Type'], delete t.headers['Content-Length']),
+        this.isSurge() || this.isLoon()
+          ? (this.isSurge() &&
+              this.isNeedRewrite &&
+              ((t.headers = t.headers || {}), Object.assign(t.headers, { 'X-Surge-Skip-Scripting': !1 })),
+            $httpClient.get(t, (t, s, i) => {
+              !t && s && ((s.body = i), (s.statusCode = s.status)), e(t, s, i)
+            }))
+          : this.isQuanX()
+          ? (this.isNeedRewrite && ((t.opts = t.opts || {}), Object.assign(t.opts, { hints: !1 })),
+            $task.fetch(t).then(
+              (t) => {
+                const { statusCode: s, statusCode: i, headers: r, body: o } = t
+                e(null, { status: s, statusCode: i, headers: r, body: o }, o)
+              },
+              (t) => e(t)
+            ))
+          : this.isNode() &&
+            (this.initGotEnv(t),
+            this.got(t)
+              .on('redirect', (t, e) => {
+                try {
+                  if (t.headers['set-cookie']) {
+                    const s = t.headers['set-cookie'].map(this.cktough.Cookie.parse).toString()
+                    this.ckjar.setCookieSync(s, null), (e.cookieJar = this.ckjar)
+                  }
+                } catch (t) {
+                  this.logErr(t)
+                }
+              })
+              .then(
+                (t) => {
+                  const { statusCode: s, statusCode: i, headers: r, body: o } = t
+                  e(null, { status: s, statusCode: i, headers: r, body: o }, o)
+                },
+                (t) => {
+                  const { message: s, response: i } = t
+                  e(s, i, i && i.body)
+                }
+              ))
+    }
+    post(t, e = () => {}) {
+      if (
+        (t.body &&
+          t.headers &&
+          !t.headers['Content-Type'] &&
+          (t.headers['Content-Type'] = 'application/x-www-form-urlencoded'),
+        t.headers && delete t.headers['Content-Length'],
+        this.isSurge() || this.isLoon())
+      )
+        this.isSurge() &&
+          this.isNeedRewrite &&
+          ((t.headers = t.headers || {}), Object.assign(t.headers, { 'X-Surge-Skip-Scripting': !1 })),
+          $httpClient.post(t, (t, s, i) => {
+            !t && s && ((s.body = i), (s.statusCode = s.status)), e(t, s, i)
+          })
+      else if (this.isQuanX())
+        (t.method = 'POST'),
+          this.isNeedRewrite && ((t.opts = t.opts || {}), Object.assign(t.opts, { hints: !1 })),
+          $task.fetch(t).then(
+            (t) => {
+              const { statusCode: s, statusCode: i, headers: r, body: o } = t
+              e(null, { status: s, statusCode: i, headers: r, body: o }, o)
+            },
+            (t) => e(t)
+          )
+      else if (this.isNode()) {
+        this.initGotEnv(t)
+        const { url: s, ...i } = t
+        this.got.post(s, i).then(
+          (t) => {
+            const { statusCode: s, statusCode: i, headers: r, body: o } = t
+            e(null, { status: s, statusCode: i, headers: r, body: o }, o)
+          },
+          (t) => {
+            const { message: s, response: i } = t
+            e(s, i, i && i.body)
+          }
+        )
+      }
+    }
+    time(t) {
+      let e = {
+        'M+': new Date().getMonth() + 1,
+        'd+': new Date().getDate(),
+        'H+': new Date().getHours(),
+        'm+': new Date().getMinutes(),
+        's+': new Date().getSeconds(),
+        'q+': Math.floor((new Date().getMonth() + 3) / 3),
+        S: new Date().getMilliseconds(),
+      }
+      ;/(y+)/.test(t) && (t = t.replace(RegExp.$1, (new Date().getFullYear() + '').substr(4 - RegExp.$1.length)))
+      for (let s in e)
+        new RegExp('(' + s + ')').test(t) &&
+          (t = t.replace(RegExp.$1, 1 == RegExp.$1.length ? e[s] : ('00' + e[s]).substr(('' + e[s]).length)))
+      return t
+    }
+    msg(e = t, s = '', i = '', r) {
+      const o = (t) => {
+        if (!t) return t
+        if ('string' == typeof t)
+          return this.isLoon() ? t : this.isQuanX() ? { 'open-url': t } : this.isSurge() ? { url: t } : void 0
+        if ('object' == typeof t) {
+          if (this.isLoon()) {
+            let e = t.openUrl || t.url || t['open-url'],
+              s = t.mediaUrl || t['media-url']
+            return { openUrl: e, mediaUrl: s }
+          }
+          if (this.isQuanX()) {
+            let e = t['open-url'] || t.url || t.openUrl,
+              s = t['media-url'] || t.mediaUrl
+            return { 'open-url': e, 'media-url': s }
+          }
+          if (this.isSurge()) {
+            let e = t.url || t.openUrl || t['open-url']
+            return { url: e }
+          }
+        }
+      }
+      this.isMute ||
+        (this.isSurge() || this.isLoon() ? $notification.post(e, s, i, o(r)) : this.isQuanX() && $notify(e, s, i, o(r)))
+      let h = ['', '==============\ud83d\udce3\u7cfb\u7edf\u901a\u77e5\ud83d\udce3==============']
+      h.push(e), s && h.push(s), i && h.push(i), console.log(h.join('\n')), (this.logs = this.logs.concat(h))
+    }
+    log(...t) {
+      t.length > 0 && (this.logs = [...this.logs, ...t]), console.log(t.join(this.logSeparator))
+    }
+    logErr(t, e) {
+      const s = !this.isSurge() && !this.isQuanX() && !this.isLoon()
+      s
+        ? this.log('', `\u2757\ufe0f${this.name}, \u9519\u8bef!`, t.stack)
+        : this.log('', `\u2757\ufe0f${this.name}, \u9519\u8bef!`, t)
+    }
+    wait(t) {
+      return new Promise((e) => setTimeout(e, t))
+    }
+    done(t = {}) {
+      const e = new Date().getTime(),
+        s = (e - this.startTime) / 1e3
+      this.log('', `\ud83d\udd14${this.name}, \u7ed3\u675f! \ud83d\udd5b ${s} \u79d2`),
+        this.log(),
+        (this.isSurge() || this.isQuanX() || this.isLoon()) && $done(t)
+    }
+  })(t, e)
+}
