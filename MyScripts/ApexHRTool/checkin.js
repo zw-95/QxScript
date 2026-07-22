@@ -36,7 +36,6 @@ let xAuthToken = $.getdata(xAuthTokenName) || ''
 let userAgent = $.getdata(userAgentName) || ''
 
 const hrHost = 'hrtool.apexsoft.com.cn'
-const barkKey = '7mVXNf3ZNHxs2GbfmcBpT5' //Bark APP 通知推送Key
 let userIdx = 0
 let userList = []
 let userCount = 0
@@ -46,6 +45,7 @@ const maxTimeout = 3 // 单位s
 let envSplitor = ['@'] //多账号分隔符
 
 $.Messages = []
+$.barkKey = $.getdata('bark_key') || '' // Bark 推送 Key，可通过 BoxJs 设置 bark_key
 //调试
 $.is_debug = 'false'
 //是否真实打卡
