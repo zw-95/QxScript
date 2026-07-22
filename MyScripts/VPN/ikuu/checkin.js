@@ -10,7 +10,7 @@ QX 1.0.10+ :
 
 [rewrite_local]
 # iKuuu VPN 签到 Cookie 捕获
-^https:\/\/ikuuu\.win\/user url-and-header script-request-header http://192.168.10.19:5500/MyScripts/VPN/ikuu/checkin.js
+//^https:\/\/ikuuu\.win\/user url-and-header script-request-header http://192.168.10.19:5500/MyScripts/VPN/ikuu/checkin.js
 
 ^https:\/\/ikuuu\.win\/user url-and-header script-request-header https://raw.githubusercontent.com/zw-95/QxScript/master/MyScripts/VPN/ikuu/checkin.js
 
