@@ -10,9 +10,9 @@ QX 1.0.10+ :
 
 [rewrite_local]
 # iKuuu VPN 签到 Cookie 捕获
-^https:\/\/ikuuu\.win\/user url-and-header script-request-header http://192.168.10.19:5500/MyScripts/VPN/ikuu/checkin.js
+// ^https:\/\/ikuuu\.win\/user ^GET url-and-header script-request-header http://192.168.137.1:5500/MyScripts/VPN/ikuu/checkin.js
 
-^https:\/\/ikuuu\.win\/user url-and-header script-request-header https://raw.githubusercontent.com/zw-95/QxScript/master/MyScripts/VPN/ikuu/checkin.js
+^https:\/\/ikuuu\.win\/user ^GET url-and-header script-request-header https://raw.githubusercontent.com/zw-95/QxScript/master/MyScripts/VPN/ikuu/checkin.js
 
 [task_local]
 0 9 * * * https://raw.githubusercontent.com/zw-95/QxScript/master/MyScripts/VPN/ikuu/checkin.js, tag=iKuuu VPN 签到, enabled=false
@@ -233,10 +233,11 @@ async function getCookie() {
   .finally(async () => {
     if ($.Messages.length > 0) {
       if ($.barkKey) {
-        // 已填写 Bark Key，推送 Bark 通知（重试3次）
-        await BarkNotify($, $.barkKey, '日常签到', $.Messages.join('\n'))
+        // 已填写 Bark Key，仅推送 Bark 通知（重试3次）
+        await BarkNotify($, $.barkKey, $.name, $.Messages.join('\n'))
+      } else {
+        await $.msg($.name, ``, $.Messages.join('\n')) // QX 系统通知
       }
-      await $.msg($.name, ``, $.Messages.join('\n')) // QX 系统通知
     }
     $.done()
   })
