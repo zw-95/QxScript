@@ -9,10 +9,10 @@ QX:
 
 [rewrite_local]
 # 本地
-^https:\/\/xxx\.com\/config ^GET url-and-header script-request-header http://192.168.137.1:5500/MyScripts/checkinTemplate.js
+//^https:\/\/xxx\.com\/config ^GET url-and-header script-request-header http://192.168.10.19:5500/MyScripts/checkinTemplate.js
 
 # 远程
-# ^https:\/\/xxx\.com\/config ^GET url-and-header script-request-header https://raw.githubusercontent.com/zw-95/QxScript/master/MyScripts/checkinTemplate.js
+^https:\/\/xxx\.com\/config ^GET url-and-header script-request-header https://raw.githubusercontent.com/zw-95/QxScript/master/MyScripts/checkinTemplate.js
 
 [mitm]
 hostname = xxx.com
